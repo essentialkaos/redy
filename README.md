@@ -6,6 +6,7 @@
   <a href="https://godoc.org/pkg.re/essentialkaos/redy.v1"><img src="https://godoc.org/pkg.re/essentialkaos/redy.v1?status.svg"></a>
   <a href="https://goreportcard.com/report/github.com/essentialkaos/redy"><img src="https://goreportcard.com/badge/github.com/essentialkaos/redy"></a>
   <a href="https://travis-ci.org/essentialkaos/redy"><img src="https://travis-ci.org/essentialkaos/redy.svg"></a>
+  <a href="https://github.com/essentialkaos/redy/blob/master/LICENSE"><img src="https://gh.kaos.st/mit.svg"></a>
 </p>
 
 `redy` is a tiny Redis client based on [radix.v2](https://github.com/mediocregopher/radix.v2) code base.
