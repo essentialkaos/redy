@@ -34,7 +34,52 @@ go get -u pkg.re/essentialkaos/redy.v1
 
 ### Usage example
 ```go
-stub
+package main
+
+import (
+  "fmt"
+  "time"
+
+  "pkg.re/essentialkaos/redy.v1"
+)
+
+func main() {
+  rc := redy.Client{
+    Network:     "tcp",
+    Addr:        "127.0.0.1:6379",
+    DialTimeout: 15 * time.Second,
+  }
+
+  err := rc.Connect()
+
+  if err != nil {
+    fmt.Printf("Connection error: %v\n", err)
+    return
+  }
+
+  r := rc.Cmd("SET", "ABC", 1)
+
+  if r.Err != nil {
+    fmt.Printf("Command error: %v\n", r.Err)
+    return
+  }
+
+  r = rc.Cmd("GET", "ABC")
+
+  if r.Err != nil {
+    fmt.Printf("Command error: %v\n", r.Err)
+    return
+  }
+
+  val, err := r.Int()
+
+  if err != nil {
+    fmt.Printf("Parsing error: %v\n", err)
+    return
+  }
+
+  fmt.Printf("ABC -> %d\n", val)
+}
 ```
 
 ### Build Status
