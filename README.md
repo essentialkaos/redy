@@ -6,6 +6,7 @@
   <a href="https://godoc.org/pkg.re/essentialkaos/redy.v1"><img src="https://godoc.org/pkg.re/essentialkaos/redy.v1?status.svg"></a>
   <a href="https://goreportcard.com/report/github.com/essentialkaos/redy"><img src="https://goreportcard.com/badge/github.com/essentialkaos/redy"></a>
   <a href="https://travis-ci.org/essentialkaos/redy"><img src="https://travis-ci.org/essentialkaos/redy.svg"></a>
+  <a href="https://codebeat.co/projects/github-com-essentialkaos-redy-master"><img alt="codebeat badge" src="https://codebeat.co/badges/1398d17c-e335-43c7-92d7-3aa484b2454c" /></a>
   <a href="https://github.com/essentialkaos/redy/blob/master/LICENSE"><img src="https://gh.kaos.st/mit.svg"></a>
 </p>
 
@@ -21,9 +22,9 @@ git config --global http.https://pkg.re.followRedirects true
 
 Make sure you have a working Go 1.8+ workspace (_[instructions](https://golang.org/doc/install)_), then:
 
-````
+```
 go get pkg.re/essentialkaos/redy.v1
-````
+```
 
 For update to latest stable release, do:
 
