@@ -1,4 +1,3 @@
-// Package redy provides a tiny Redis client based on radix.v2 code base
 package redy
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -113,7 +112,8 @@ func (c *Client) PipeResp() *Resp {
 	}
 
 	if len(c.pending) == 0 {
-		errToResp(RedisErr, ErrEmptyPipeline)
+		resp := errToResp(RedisErr, ErrEmptyPipeline)
+		return &resp
 	}
 
 	nreqs := len(c.pending)
