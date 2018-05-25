@@ -337,6 +337,24 @@ func (rs *RedySuite) TestRespRead(c *C) {
 	c.Assert(r.val.([]Resp)[1].val, DeepEquals, []byte("1234"))
 }
 
+func (rs *RedySuite) TestInfoParse(c *C) {
+	r := rs.c.Cmd("INFO")
+
+	c.Assert(r, NotNil)
+	c.Assert(r.Err, IsNil)
+	c.Assert(r.IsType(BulkStr), Equals, true)
+
+	info, err := ParseInfo(r)
+
+	c.Assert(err, IsNil)
+	c.Assert(info, NotNil)
+
+	c.Assert(info.Get("server", "redis_mode"), Equals, "standalone")
+	c.Assert(info.GetI("server", "hz"), Equals, 10)
+	c.Assert(info.GetU("server", "hz"), Equals, uint64(10))
+	c.Assert(info.GetF("memory", "mem_fragmentation_ratio"), Not(Equals), 0.0)
+}
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 func pretendRead(s string) *Resp {
