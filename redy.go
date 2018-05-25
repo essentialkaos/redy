@@ -1,0 +1,6 @@
+// Package redy provides a tiny Redis client based on radix.v2 code base
+package redy
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+const VERSION = "1.0.0"
