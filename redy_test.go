@@ -67,9 +67,7 @@ func (rs *RedySuite) TestConnectionError(c *C) {
 }
 
 func (rs *RedySuite) TestCmd(c *C) {
-	var r *Resp
-
-	r = rs.c.Cmd("ECHO", "TEST1234")
+	r := rs.c.Cmd("ECHO", "TEST1234")
 	respStr, err := r.Str()
 	c.Assert(r, NotNil)
 	c.Assert(r.Err, IsNil)
@@ -337,7 +335,7 @@ func (rs *RedySuite) TestRespRead(c *C) {
 	c.Assert(r.val.([]Resp)[1].val, DeepEquals, []byte("1234"))
 }
 
-func (rs *RedySuite) TestInfoParse(c *C) {
+func (rs *RedySuite) TestInfoParser(c *C) {
 	r := rs.c.Cmd("INFO")
 
 	c.Assert(r, NotNil)
@@ -353,6 +351,17 @@ func (rs *RedySuite) TestInfoParse(c *C) {
 	c.Assert(info.GetI("server", "hz"), Equals, 10)
 	c.Assert(info.GetU("server", "hz"), Equals, uint64(10))
 	c.Assert(info.GetF("memory", "mem_fragmentation_ratio"), Not(Equals), 0.0)
+}
+
+func (rs *RedySuite) TestConfigParser(c *C) {
+	conf, err := ReadConfig(".travis/full.conf")
+
+	c.Assert(err, IsNil)
+	c.Assert(conf, NotNil)
+
+	c.Assert(conf.Get("tcp-keepalive"), Equals, "300")
+	c.Assert(conf.Get("masterauth"), Equals, "")
+	c.Assert(conf.Get("save"), Equals, "900 1 300 10 60 10000")
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

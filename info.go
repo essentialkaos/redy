@@ -11,24 +11,28 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// Info contains parsed INFO data
 type Info struct {
 	SectionNames []string
 	Sections     map[string]*InfoSection
 	Keyspace     *KeyspaceInfo
 }
 
+// KeyspaceInfo contains info about keyspace
 type KeyspaceInfo struct {
 	Databases []string
 	DBList    map[string]*DBInfo
 	Total     *DBInfo
 }
 
+// DBInfo contains info about single db
 type DBInfo struct {
 	Keys    uint64
 	Expires uint64
 	AvgTTL  uint64
 }
 
+// InfoSection contains section info
 type InfoSection struct {
 	Header string
 	Props  []string
@@ -131,7 +135,7 @@ func parseRedisInfo(rawInfo string) (*Info, error) {
 		Sections: make(map[string]*InfoSection),
 		Keyspace: &KeyspaceInfo{
 			Databases: make([]string, 0),
-			DBList:    make(map[string]*DBInfo, 0),
+			DBList:    make(map[string]*DBInfo),
 			Total:     &DBInfo{},
 		},
 	}
@@ -185,7 +189,6 @@ func parseRedisInfo(rawInfo string) (*Info, error) {
 	return info, nil
 }
 
-// parseDBInfo parse raw info about each db on instance
 func parseDBInfo(info string) *DBInfo {
 	kv, _ := strconv.ParseUint(readField(info, 1, false, "=", ","), 10, 64)
 	ev, _ := strconv.ParseUint(readField(info, 3, false, "=", ","), 10, 64)
@@ -194,7 +197,6 @@ func parseDBInfo(info string) *DBInfo {
 	return &DBInfo{Keys: kv, Expires: ev, AvgTTL: tv}
 }
 
-// ReadField read field with given index from data
 func readField(data string, index int, multiSep bool, separators ...string) string {
 	if data == "" || index < 0 {
 		return ""
