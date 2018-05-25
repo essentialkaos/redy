@@ -346,12 +346,15 @@ func (r *Resp) Map() (map[string]string, error) {
 func (r *Resp) String() string {
 	switch r.typ {
 	case RedisErr:
-		return fmt.Sprintf("Resp(RedisErr %s)", r.Err)
+		return fmt.Sprintf("Resp(RedisErr \"%s\")", r.Err)
 
 	case IOErr:
-		return fmt.Sprintf("Resp(IOErr %s)", r.Err)
+		return fmt.Sprintf("Resp(IOErr \"%s\")", r.Err)
 
-	case BulkStr, SimpleStr:
+	case BulkStr:
+		return fmt.Sprintf("Resp(BulkStr %q)", string(r.val.([]byte)))
+
+	case SimpleStr:
 		return fmt.Sprintf("Resp(Str %q)", string(r.val.([]byte)))
 
 	case Int:
@@ -883,15 +886,15 @@ func errToResp(t RespType, err error) Resp {
 func arrayToString(resp *Resp) string {
 	var kids string
 
-	for _, r := range resp.val.([]Resp) {
-		kids = " " + r.String()
+	for i, r := range resp.val.([]Resp) {
+		kids += " " + fmt.Sprintf("%d:%s", i, r.String())
 	}
 
 	if kids == "" {
 		return "Resp(Empty Array)"
 	}
 
-	return fmt.Sprintf("Resp(%s)", kids[1:])
+	return "Resp(" + kids[1:] + ")"
 }
 
 func isTimeout(resp *Resp) bool {

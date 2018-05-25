@@ -212,14 +212,14 @@ func (rs *RedySuite) TestRespRead(c *C) {
 	c.Assert(r.IsType(RedisErr), Equals, true)
 	c.Assert(r.val, DeepEquals, errors.New("TEST1234"))
 	c.Assert(r.Err.Error(), Equals, "TEST1234")
-	c.Assert(r.String(), Equals, "Resp(RedisErr TEST1234)")
+	c.Assert(r.String(), Equals, "Resp(RedisErr \"TEST1234\")")
 
 	// Empty error
 	r = pretendRead("-\r\n")
 	c.Assert(r.IsType(RedisErr), Equals, true)
 	c.Assert(r.val, DeepEquals, errors.New(""))
 	c.Assert(r.Err.Error(), Equals, "")
-	c.Assert(r.String(), Equals, "Resp(RedisErr )")
+	c.Assert(r.String(), Equals, "Resp(RedisErr \"\")")
 
 	// Int
 	r = pretendRead(":1024\r\n")
@@ -260,7 +260,7 @@ func (rs *RedySuite) TestRespRead(c *C) {
 	s, err = r.Str()
 	c.Assert(err, IsNil)
 	c.Assert(s, Equals, "TEST1234")
-	c.Assert(r.String(), Equals, "Resp(Str \"TEST1234\")")
+	c.Assert(r.String(), Equals, "Resp(BulkStr \"TEST1234\")")
 
 	// Empty bulk string
 	r = pretendRead("$0\r\n\r\n")
@@ -269,7 +269,7 @@ func (rs *RedySuite) TestRespRead(c *C) {
 	s, err = r.Str()
 	c.Assert(err, IsNil)
 	c.Assert(s, Equals, "")
-	c.Assert(r.String(), Equals, "Resp(Str \"\")")
+	c.Assert(r.String(), Equals, "Resp(BulkStr \"\")")
 
 	// Nil bulk string
 	r = pretendRead("$-1\r\n")
@@ -296,7 +296,7 @@ func (rs *RedySuite) TestRespRead(c *C) {
 	m, err := r.Map()
 	c.Assert(err, IsNil)
 	c.Assert(m, DeepEquals, map[string]string{"TEST": "1234"})
-	c.Assert(r.String(), Equals, "Resp(Resp(Str \"1234\"))")
+	c.Assert(r.String(), Equals, "Resp(0:Resp(Str \"TEST\") 1:Resp(Str \"1234\"))")
 
 	// Empty Array
 	r = pretendRead("*0\r\n")
@@ -311,7 +311,7 @@ func (rs *RedySuite) TestRespRead(c *C) {
 
 	// Embedded Array
 	r = pretendRead("*3\r\n+TEST\r\n+1234\r\n*2\r\n+STUB\r\n+5678\r\n")
-	c.Assert(r.String(), Equals, "Resp(Resp(Resp(Str \"5678\")))")
+	c.Assert(r.String(), Equals, "Resp(0:Resp(Str \"TEST\") 1:Resp(Str \"1234\") 2:Resp(0:Resp(Str \"STUB\") 1:Resp(Str \"5678\")))")
 	c.Assert(r.IsType(Array), Equals, true)
 	c.Assert(len(r.val.([]Resp)), Equals, 3)
 	c.Assert(r.val.([]Resp)[0].IsType(SimpleStr), Equals, true)
@@ -328,7 +328,7 @@ func (rs *RedySuite) TestRespRead(c *C) {
 
 	// Test that two bulks in a row read correctly
 	r = pretendRead("*2\r\n$4\r\nTEST\r\n$4\r\n1234\r\n")
-	c.Assert(r.String(), Equals, "Resp(Resp(Str \"1234\"))")
+	c.Assert(r.String(), Equals, "Resp(0:Resp(BulkStr \"TEST\") 1:Resp(BulkStr \"1234\"))")
 	c.Assert(r.IsType(Array), Equals, true)
 	c.Assert(len(r.val.([]Resp)), Equals, 2)
 	c.Assert(r.val.([]Resp)[0].IsType(BulkStr), Equals, true)
