@@ -249,7 +249,7 @@ func (rs *RedySuite) TestRespRead(c *C) {
 	r = pretendRead("+TEST1234\r\n")
 	c.Assert(r.IsType(SimpleStr), Equals, true)
 	c.Assert(r.val, DeepEquals, []byte("TEST1234"))
-	i, err = r.Int()
+	_, err = r.Int()
 	c.Assert(err, NotNil)
 	c.Assert(r.String(), Equals, "Resp(Str \"TEST1234\")")
 
