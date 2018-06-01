@@ -338,6 +338,12 @@ func (rs *RedySuite) TestRespRead(c *C) {
 	c.Assert(r.val.([]Resp)[0].val, DeepEquals, []byte("TEST"))
 	c.Assert(r.val.([]Resp)[1].IsType(BulkStr), Equals, true)
 	c.Assert(r.val.([]Resp)[1].val, DeepEquals, []byte("1234"))
+
+	r = &Resp{}
+	c.Assert(r.String(), Equals, "Resp(Unknown)")
+
+	r = &Resp{typ: IOErr, Err: errors.New("IOERR")}
+	c.Assert(r.String(), Equals, "Resp(IOErr \"IOERR\")")
 }
 
 func (rs *RedySuite) TestRespReadErrors(c *C) {
@@ -347,8 +353,73 @@ func (rs *RedySuite) TestRespReadErrors(c *C) {
 	_, err = r.Int64()
 	c.Assert(err, NotNil)
 
-	r = &Resp{typ: Array}
+	r = &Resp{typ: Array, val: -1}
+	_, err = r.Bytes()
+	c.Assert(err, NotNil)
+	_, err = r.Float64()
+	c.Assert(err, NotNil)
+	_, err = r.List()
+	c.Assert(err, NotNil)
+	_, err = r.ListBytes()
+	c.Assert(err, NotNil)
+	_, err = r.Map()
+	c.Assert(err, NotNil)
 
+	r = &Resp{typ: BulkStr, val: -1}
+	_, err = r.Bytes()
+	c.Assert(err, NotNil)
+
+	r = &Resp{Err: errors.New("TEST")}
+	_, err = r.Bytes()
+	c.Assert(err, NotNil)
+	_, err = r.Int64()
+	c.Assert(err, NotNil)
+	_, err = r.Float64()
+	c.Assert(err, NotNil)
+	_, err = r.Array()
+	c.Assert(err, NotNil)
+	_, err = r.List()
+	c.Assert(err, NotNil)
+	_, err = r.ListBytes()
+	c.Assert(err, NotNil)
+	_, err = r.Map()
+	c.Assert(err, NotNil)
+
+	r = &Resp{typ: BulkStr, val: "abc"}
+	_, err = r.Int64()
+	c.Assert(err, NotNil)
+
+	r = &Resp{typ: BulkStr, val: []byte("abc")}
+	_, err = r.Float64()
+	c.Assert(err, NotNil)
+
+	r = &Resp{typ: Array, val: []Resp{Resp{typ: Nil}, Resp{typ: Str, val: -1}}}
+	_, err = r.List()
+	c.Assert(err, NotNil)
+	_, err = r.ListBytes()
+	c.Assert(err, NotNil)
+
+	r = &Resp{typ: Array, val: []Resp{Resp{typ: Nil}}}
+	_, err = r.Map()
+	c.Assert(err, NotNil)
+
+	r = &Resp{typ: Array, val: []Resp{
+		Resp{typ: Str, val: -1},
+		Resp{typ: Nil},
+	}}
+
+	_, err = r.Map()
+	c.Assert(err, NotNil)
+
+	r = &Resp{typ: Array, val: []Resp{
+		Resp{typ: Str, val: []byte("abc")},
+		Resp{typ: Nil},
+		Resp{typ: Str, val: []byte("abcd")},
+		Resp{typ: Str, val: -1},
+	}}
+
+	_, err = r.Map()
+	c.Assert(err, NotNil)
 }
 
 func (rs *RedySuite) TestInfoParser(c *C) {
