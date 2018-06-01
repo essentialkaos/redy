@@ -80,6 +80,31 @@ func (c *Config) Get(prop string) string {
 	return strings.Join(value, " ")
 }
 
+// Diff compare two configs
+func (c *Config) Diff(nc *Config) []string {
+	if c == nil || nc == nil {
+		return []string{}
+	}
+
+	var result []string
+
+	for _, prop := range c.Props {
+		if c.Get(prop) != nc.Get(prop) {
+			result = append(result, prop)
+		}
+	}
+
+	for _, prop := range nc.Props {
+		_, has := c.Data[prop]
+
+		if !has {
+			result = append(result, prop)
+		}
+	}
+
+	return result
+}
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 func parseInMemoryConfig(r *Resp) (*Config, error) {

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"math/rand"
 	"os"
+	"sort"
 	"testing"
 	"time"
 
@@ -487,6 +488,39 @@ func (rs *RedySuite) TestConfigParsers(c *C) {
 	resp = &Resp{typ: Array, val: []Resp{Resp{}, Resp{}, Resp{}}}
 	_, err = parseInMemoryConfig(resp)
 	c.Assert(err, NotNil)
+}
+
+func (rs *RedySuite) TestConfigDiff(c *C) {
+	var c1 *Config
+	var c2 *Config
+
+	c.Assert(len(c1.Diff(c2)), Equals, 0)
+
+	c1 = &Config{
+		Props: []string{"a", "b", "c", "d"},
+		Data: map[string][]string{
+			"a": []string{"1"},
+			"b": []string{"2"},
+			"c": []string{"3"},
+			"d": []string{"4"},
+		},
+	}
+
+	c2 = &Config{
+		Props: []string{"a", "b", "c", "e"},
+		Data: map[string][]string{
+			"a": []string{"1"},
+			"b": []string{"W"},
+			"c": []string{"3"},
+			"e": []string{"5"},
+		},
+	}
+
+	diff := c1.Diff(c2)
+	sort.Strings(diff)
+
+	c.Assert(len(diff), Equals, 3)
+	c.Assert(diff, DeepEquals, []string{"b", "d", "e"})
 }
 
 func (rs *RedySuite) TestAux(c *C) {
