@@ -357,15 +357,38 @@ func (rs *RedySuite) TestInfoParser(c *C) {
 	c.Assert(info.GetF("memory", "mem_fragmentation_ratio"), Not(Equals), 0.0)
 }
 
-func (rs *RedySuite) TestConfigParser(c *C) {
-	conf, err := ReadConfig(".travis/full.conf")
+func (rs *RedySuite) TestConfigParsers(c *C) {
+	fileConf, err := ReadConfig(".travis/test.conf")
+
+	c.Assert(err, NotNil)
+	c.Assert(fileConf, IsNil)
+
+	fileConf, err = ReadConfig(".travis/full.conf")
 
 	c.Assert(err, IsNil)
-	c.Assert(conf, NotNil)
+	c.Assert(fileConf, NotNil)
 
-	c.Assert(conf.Get("tcp-keepalive"), Equals, "300")
-	c.Assert(conf.Get("masterauth"), Equals, "")
-	c.Assert(conf.Get("save"), Equals, "900 1 300 10 60 10000")
+	fcKeepalive := fileConf.Get("tcp-keepalive")
+	fcAuth := fileConf.Get("masterauth")
+	fcSave := fileConf.Get("save")
+
+	c.Assert(fcKeepalive, Equals, "300")
+	c.Assert(fcAuth, Equals, "")
+	c.Assert(fcSave, Equals, "900 1 300 10 60 10000")
+
+	memConf, err := rs.c.GetConfig("ECHO")
+
+	c.Assert(err, NotNil)
+	c.Assert(memConf, IsNil)
+
+	memConf, err = rs.c.GetConfig("CONFIG")
+
+	c.Assert(err, IsNil)
+	c.Assert(memConf, NotNil)
+
+	c.Assert(memConf.Get("tcp-keepalive"), Equals, fcKeepalive)
+	c.Assert(memConf.Get("masterauth"), Equals, fcAuth)
+	c.Assert(memConf.Get("save"), Equals, fcSave)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

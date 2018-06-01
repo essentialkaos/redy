@@ -4,6 +4,7 @@ package redy
 
 import (
 	"bufio"
+	"errors"
 	"os"
 	"strings"
 )
@@ -79,6 +80,44 @@ func (c *Config) Get(prop string) string {
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
+
+func parseInMemoryConfig(r *Resp) (*Config, error) {
+	items, err := r.Array()
+
+	if err != nil {
+		return nil, err
+	}
+
+	itemsNum := len(items)
+
+	if itemsNum%2 != 0 {
+		return nil, errors.New("Wrong number of items in CONFIG response")
+	}
+
+	config := &Config{
+		Props: make([]string, 0),
+		Data:  make(map[string][]string),
+	}
+
+	for i := 0; i < itemsNum; i += 2 {
+		prop, err := items[i].Str()
+
+		if err != nil {
+			return nil, err
+		}
+
+		value, err := items[i+1].Str()
+
+		if err != nil {
+			return nil, err
+		}
+
+		config.Props = append(config.Props, prop)
+		config.Data[prop] = []string{value}
+	}
+
+	return config, nil
+}
 
 func extractConfValue(line string) string {
 	index := strings.Index(line, " ")

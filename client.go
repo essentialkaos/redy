@@ -43,8 +43,9 @@ type Client struct {
 
 // Errors
 var (
-	ErrEmptyPipeline = errors.New("Pipeline is empty")
-	ErrNotConnected  = errors.New("Client not connected")
+	ErrEmptyPipeline     = errors.New("Pipeline is empty")
+	ErrNotConnected      = errors.New("Client not connected")
+	ErrWrongConfResponse = errors.New("CONFIG command response must have Array type")
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -162,6 +163,21 @@ func (c *Client) PipeClear() (int, int) {
 	}
 
 	return callCount, replyCount
+}
+
+// GetConfig read and parse full in-memory config
+func (c *Client) GetConfig(configCommand string) (*Config, error) {
+	resp := c.Cmd(configCommand, "GET", "*")
+
+	if resp.Err != nil {
+		return nil, resp.Err
+	}
+
+	if !resp.IsType(Array) {
+		return nil, ErrWrongConfResponse
+	}
+
+	return parseInMemoryConfig(resp)
 }
 
 // Close closes the connection
