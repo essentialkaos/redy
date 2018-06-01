@@ -358,6 +358,11 @@ func (rs *RedySuite) TestInfoParser(c *C) {
 }
 
 func (rs *RedySuite) TestConfigParsers(c *C) {
+	var cfg *Config
+
+	c.Assert(cfg.Get("abc"), Equals, "")
+	c.Assert(cfg.Get(""), Equals, "")
+
 	fileConf, err := ReadConfig(".travis/test.conf")
 
 	c.Assert(err, NotNil)
@@ -371,6 +376,7 @@ func (rs *RedySuite) TestConfigParsers(c *C) {
 	fcKeepalive := fileConf.Get("tcp-keepalive")
 	fcAuth := fileConf.Get("masterauth")
 	fcSave := fileConf.Get("save")
+	fcLimit := fileConf.Get("client-output-buffer-limit")
 
 	c.Assert(fcKeepalive, Equals, "300")
 	c.Assert(fcAuth, Equals, "")
@@ -389,6 +395,32 @@ func (rs *RedySuite) TestConfigParsers(c *C) {
 	c.Assert(memConf.Get("tcp-keepalive"), Equals, fcKeepalive)
 	c.Assert(memConf.Get("masterauth"), Equals, fcAuth)
 	c.Assert(memConf.Get("save"), Equals, fcSave)
+	c.Assert(memConf.Get("client-output-buffer-limit"), Equals, fcLimit)
+
+	resp := &Resp{typ: SimpleStr, val: ""}
+	_, err = parseInMemoryConfig(resp)
+	c.Assert(err, NotNil)
+
+	resp = &Resp{typ: Array, val: []Resp{Resp{}, Resp{}, Resp{}}}
+	_, err = parseInMemoryConfig(resp)
+	c.Assert(err, NotNil)
+}
+
+func (rs *RedySuite) TestAux(c *C) {
+	c.Assert(extractConfValue("abc"), Equals, "abc")
+
+	c.Assert(parseSize("1 MB"), Equals, uint64(1024*1024))
+	c.Assert(parseSize("1 M"), Equals, uint64(1000*1000))
+	c.Assert(parseSize("2tb"), Equals, uint64(2*1024*1024*1024*1024))
+	c.Assert(parseSize("2t"), Equals, uint64(2*1000*1000*1000*1000))
+	c.Assert(parseSize("5gB"), Equals, uint64(5*1024*1024*1024))
+	c.Assert(parseSize("5g"), Equals, uint64(5*1000*1000*1000))
+	c.Assert(parseSize("13kb"), Equals, uint64(13*1024))
+	c.Assert(parseSize("13k"), Equals, uint64(13*1000))
+	c.Assert(parseSize("512"), Equals, uint64(512))
+	c.Assert(parseSize("512b"), Equals, uint64(512))
+	c.Assert(parseSize("kb"), Equals, uint64(0))
+	c.Assert(parseSize("123!"), Equals, uint64(0))
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

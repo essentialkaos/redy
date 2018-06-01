@@ -6,6 +6,7 @@ import (
 	"bufio"
 	"errors"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -100,17 +101,8 @@ func parseInMemoryConfig(r *Resp) (*Config, error) {
 	}
 
 	for i := 0; i < itemsNum; i += 2 {
-		prop, err := items[i].Str()
-
-		if err != nil {
-			return nil, err
-		}
-
-		value, err := items[i+1].Str()
-
-		if err != nil {
-			return nil, err
-		}
+		prop, _ := items[i].Str()
+		value, _ := items[i+1].Str()
 
 		config.Props = append(config.Props, prop)
 		config.Data[prop] = []string{value}
@@ -126,5 +118,94 @@ func extractConfValue(line string) string {
 		return line
 	}
 
-	return strings.TrimLeft(line[index:], " ")
+	return processConfValue(strings.TrimLeft(line[index:], " "))
+}
+
+func processConfValue(line string) string {
+	for i := 0; i < strings.Count(line, " ")+1; i++ {
+		v := readField(line, i, true, " ")
+
+		if isSize(v) {
+			s := parseSize(v)
+			line = strings.Replace(line, v, strconv.FormatUint(s, 10), -1)
+		}
+	}
+
+	return line
+}
+
+func isSize(v string) bool {
+	for _, r := range v {
+		switch r {
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+			't', 'g', 'm', 'k', 'b', 'T', 'G', 'M', 'K', 'B':
+			continue
+
+		default:
+			return false
+		}
+	}
+
+	return true
+}
+
+func parseSize(size string) uint64 {
+	ns := strings.ToLower(strings.Replace(size, " ", "", -1))
+	mlt, sfx := extractSizeInfo(ns)
+
+	if sfx == "" {
+		num, err := strconv.ParseUint(size, 10, 64)
+
+		if err != nil {
+			return 0
+		}
+
+		return num
+	}
+
+	ns = strings.TrimRight(ns, sfx)
+	numFlt, err := strconv.ParseFloat(ns, 64)
+
+	if err != nil {
+		return 0
+	}
+
+	return uint64(numFlt * float64(mlt))
+}
+
+func extractSizeInfo(s string) (uint64, string) {
+	var mlt uint64
+	var sfx string
+
+	switch {
+	case strings.HasSuffix(s, "tb"):
+		mlt = 1024 * 1024 * 1024 * 1024
+		sfx = "tb"
+	case strings.HasSuffix(s, "t"):
+		mlt = 1000 * 1000 * 1000 * 1000
+		sfx = "t"
+	case strings.HasSuffix(s, "gb"):
+		mlt = 1024 * 1024 * 1024
+		sfx = "gb"
+	case strings.HasSuffix(s, "g"):
+		mlt = 1000 * 1000 * 1000
+		sfx = "g"
+	case strings.HasSuffix(s, "mb"):
+		mlt = 1024 * 1024
+		sfx = "mb"
+	case strings.HasSuffix(s, "m"):
+		mlt = 1000 * 1000
+		sfx = "m"
+	case strings.HasSuffix(s, "kb"):
+		mlt = 1024
+		sfx = "kb"
+	case strings.HasSuffix(s, "k"):
+		mlt = 1000
+		sfx = "k"
+	case strings.HasSuffix(s, "b"):
+		mlt = 1
+		sfx = "b"
+	}
+
+	return mlt, sfx
 }
