@@ -29,6 +29,7 @@ install:
   - tar xf redis-stable.tar.gz
   - (cd redis-stable && make)
   - export PATH=./redis-stable/src:$PATH
+  - redis-server --version
   - redis-server .travis/redis.conf
 
 script:
