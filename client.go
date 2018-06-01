@@ -41,9 +41,10 @@ type Client struct {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// Errors
 var (
-	// ErrEmptyPipeline is empty pipeline error
 	ErrEmptyPipeline = errors.New("Pipeline is empty")
+	ErrNotConnected  = errors.New("Client not connected")
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -88,6 +89,11 @@ func (c *Client) Connect() error {
 
 // Cmd calls the given Redis command
 func (c *Client) Cmd(cmd string, args ...interface{}) *Resp {
+	if c.conn == nil {
+		resp := errToResp(IOErr, ErrNotConnected)
+		return &resp
+	}
+
 	err := c.writeRequest(req{cmd, args})
 
 	if err != nil {
@@ -105,6 +111,11 @@ func (c *Client) PipeAppend(cmd string, args ...interface{}) {
 
 // PipeResp returns the reply for the next request in the pipeline queue
 func (c *Client) PipeResp() *Resp {
+	if c.conn == nil {
+		resp := errToResp(IOErr, ErrNotConnected)
+		return &resp
+	}
+
 	if len(c.completed) > 0 {
 		resp := c.completed[0]
 		c.completed = c.completed[1:]

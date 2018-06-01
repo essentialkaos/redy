@@ -61,6 +61,10 @@ func (rs *RedySuite) TestConnectionError(c *C) {
 		Addr:    "127.0.0.255:60000",
 	}
 
+	resp := rc.Cmd("PING")
+
+	c.Assert(resp.Err, NotNil)
+
 	err := rc.Connect()
 
 	c.Assert(err, NotNil)
