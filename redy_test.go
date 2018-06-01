@@ -62,11 +62,12 @@ func (rs *RedySuite) TestConnectionError(c *C) {
 	}
 
 	resp := rc.Cmd("PING")
+	c.Assert(resp.Err, NotNil)
 
+	resp = rc.PipeResp()
 	c.Assert(resp.Err, NotNil)
 
 	err := rc.Connect()
-
 	c.Assert(err, NotNil)
 }
 
@@ -337,6 +338,17 @@ func (rs *RedySuite) TestRespRead(c *C) {
 	c.Assert(r.val.([]Resp)[0].val, DeepEquals, []byte("TEST"))
 	c.Assert(r.val.([]Resp)[1].IsType(BulkStr), Equals, true)
 	c.Assert(r.val.([]Resp)[1].val, DeepEquals, []byte("1234"))
+}
+
+func (rs *RedySuite) TestRespReadErrors(c *C) {
+	r := &Resp{typ: Nil}
+	_, err := r.Bytes()
+	c.Assert(err, NotNil)
+	_, err = r.Int64()
+	c.Assert(err, NotNil)
+
+	r = &Resp{typ: Array}
+
 }
 
 func (rs *RedySuite) TestInfoParser(c *C) {
