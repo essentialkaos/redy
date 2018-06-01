@@ -632,7 +632,7 @@ func flattenMap(m interface{}) []interface{} {
 	return ret
 }
 
-func writeTo(w io.Writer, buf []byte, m interface{}, forceString, noArrayHeader bool) (int, error) {
+func writeTo(w io.Writer, buf []byte, m interface{}) (int, error) {
 	switch mt := m.(type) {
 	case []byte:
 		return writeBytes(w, buf, mt)
@@ -644,10 +644,10 @@ func writeTo(w io.Writer, buf []byte, m interface{}, forceString, noArrayHeader 
 		return writeBool(w, buf, mt)
 
 	case nil:
-		return writeNil(w, buf, forceString)
+		return writeNil(w, buf)
 
 	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
-		return writeInt(w, buf, forceString, intv(mt))
+		return writeInt(w, buf, intv(mt))
 
 	case float32:
 		return writeFloat(w, buf, float64(mt))
@@ -656,24 +656,24 @@ func writeTo(w io.Writer, buf []byte, m interface{}, forceString, noArrayHeader 
 		return writeFloat(w, buf, mt)
 
 	case error:
-		return writeError(w, buf, forceString, mt)
+		return writeError(w, buf, mt)
 
 	case *Resp:
-		return writeTo(w, buf, mt.val, forceString, noArrayHeader)
+		return writeTo(w, buf, mt.val)
 
 	case Resp:
-		return writeTo(w, buf, mt.val, forceString, noArrayHeader)
+		return writeTo(w, buf, mt.val)
 
 	case []interface{}:
-		return writeInterface(w, buf, mt, forceString, noArrayHeader)
+		return writeInterface(w, buf, mt)
 
 	default:
 		switch reflect.TypeOf(m).Kind() {
 		case reflect.Slice:
-			return writeSlice(w, buf, mt, forceString, noArrayHeader)
+			return writeSlice(w, buf, mt)
 
 		case reflect.Map:
-			return writeMap(w, buf, mt, forceString, noArrayHeader)
+			return writeMap(w, buf, mt)
 		}
 	}
 
@@ -738,29 +738,13 @@ func writeBool(w io.Writer, buf []byte, b bool) (int, error) {
 	return writeBytes(w, buf[1:], buf[:1])
 }
 
-func writeNil(w io.Writer, buf []byte, forceString bool) (int, error) {
-	if forceString {
-		return writeBytes(w, buf, nil)
-	}
-
-	return w.Write(nilFormatted)
+func writeNil(w io.Writer, buf []byte) (int, error) {
+	return writeBytes(w, buf, nil)
 }
 
-func writeInt(w io.Writer, buf []byte, forceString bool, i int) (int, error) {
+func writeInt(w io.Writer, buf []byte, i int) (int, error) {
 	buf = strconv.AppendInt(buf[:0], int64(i), 10)
-
-	if forceString {
-		return writeBytes(w, buf[len(buf):], buf)
-	}
-
-	var err error
-	var written int
-
-	written, err = writeBytesHelper(w, prefixInt, written, err)
-	written, err = writeBytesHelper(w, buf, written, err)
-	written, err = writeBytesHelper(w, delim, written, err)
-
-	return written, err
+	return writeBytes(w, buf[len(buf):], buf)
 }
 
 func writeFloat(w io.Writer, buf []byte, f float64) (int, error) {
@@ -768,39 +752,18 @@ func writeFloat(w io.Writer, buf []byte, f float64) (int, error) {
 	return writeBytes(w, buf[len(buf):], buf)
 }
 
-func writeError(w io.Writer, buf []byte, forceString bool, e error) (int, error) {
+func writeError(w io.Writer, buf []byte, e error) (int, error) {
 	errData := []byte(e.Error())
-
-	if forceString {
-		return writeBytes(w, buf, errData)
-	}
-
-	var err error
-	var written int
-
-	written, err = writeBytesHelper(w, prefixErr, written, err)
-	written, err = writeBytesHelper(w, errData, written, err)
-	written, err = writeBytesHelper(w, delim, written, err)
-
-	return written, err
+	return writeBytes(w, buf, errData)
 }
 
-func writeInterface(w io.Writer, buf []byte, mt []interface{}, forceString, noArrayHeader bool) (int, error) {
+func writeInterface(w io.Writer, buf []byte, mt []interface{}) (int, error) {
 	var totalWritten int
 
 	l := len(mt)
 
-	if !noArrayHeader {
-		written, err := writeArrayHeader(w, buf, l)
-		totalWritten += written
-
-		if err != nil {
-			return totalWritten, err
-		}
-	}
-
 	for i := 0; i < l; i++ {
-		written, err := writeTo(w, buf, mt[i], forceString, noArrayHeader)
+		written, err := writeTo(w, buf, mt[i])
 		totalWritten += written
 
 		if err != nil {
@@ -811,26 +774,17 @@ func writeInterface(w io.Writer, buf []byte, mt []interface{}, forceString, noAr
 	return totalWritten, nil
 }
 
-func writeSlice(w io.Writer, buf []byte, mt interface{}, forceString, noArrayHeader bool) (int, error) {
+func writeSlice(w io.Writer, buf []byte, mt interface{}) (int, error) {
 	rm := reflect.ValueOf(mt)
 	l := rm.Len()
 
 	var err error
 	var totalWritten, written int
 
-	if !noArrayHeader {
-		written, err = writeArrayHeader(w, buf, l)
-		totalWritten += written
-
-		if err != nil {
-			return totalWritten, err
-		}
-	}
-
 	for i := 0; i < l; i++ {
 		vv := rm.Index(i).Interface()
 
-		written, err = writeTo(w, buf, vv, forceString, noArrayHeader)
+		written, err = writeTo(w, buf, vv)
 		totalWritten += written
 
 		if err != nil {
@@ -841,26 +795,16 @@ func writeSlice(w io.Writer, buf []byte, mt interface{}, forceString, noArrayHea
 	return totalWritten, nil
 }
 
-func writeMap(w io.Writer, buf []byte, mt interface{}, forceString, noArrayHeader bool) (int, error) {
+func writeMap(w io.Writer, buf []byte, mt interface{}) (int, error) {
 	rm := reflect.ValueOf(mt)
-	l := rm.Len() * 2
 
 	var err error
 	var totalWritten, written int
 
-	if !noArrayHeader {
-		written, err = writeArrayHeader(w, buf, l)
-		totalWritten += written
-
-		if err != nil {
-			return totalWritten, err
-		}
-	}
-
 	for _, k := range rm.MapKeys() {
 		kv := k.Interface()
 
-		written, err = writeTo(w, buf, kv, forceString, noArrayHeader)
+		written, err = writeTo(w, buf, kv)
 		totalWritten += written
 
 		if err != nil {
@@ -868,7 +812,7 @@ func writeMap(w io.Writer, buf []byte, mt interface{}, forceString, noArrayHeade
 		}
 
 		vv := rm.MapIndex(k).Interface()
-		written, err = writeTo(w, buf, vv, forceString, noArrayHeader)
+		written, err = writeTo(w, buf, vv)
 		totalWritten += written
 
 		if err != nil {

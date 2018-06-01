@@ -29,6 +29,8 @@ type Client struct {
 	DialTimeout  time.Duration
 	LastCritical error
 
+	ForceString bool
+
 	conn         net.Conn
 	respReader   *RespReader
 	writeScratch []byte
@@ -205,14 +207,14 @@ MAINLOOP:
 			break
 		}
 
-		_, err = writeTo(c.writeBuf, c.writeScratch, r.cmd, true, true)
+		_, err = writeTo(c.writeBuf, c.writeScratch, r.cmd)
 
 		if err != nil {
 			break
 		}
 
 		for _, arg := range r.args {
-			_, err = writeTo(c.writeBuf, c.writeScratch, arg, true, true)
+			_, err = writeTo(c.writeBuf, c.writeScratch, arg)
 
 			if err != nil {
 				break MAINLOOP

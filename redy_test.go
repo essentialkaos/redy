@@ -3,9 +3,12 @@ package redy
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
+	"bufio"
 	"bytes"
+	"crypto/tls"
 	"errors"
 	"math/rand"
+	"net"
 	"os"
 	"sort"
 	"testing"
@@ -13,6 +16,12 @@ import (
 
 	. "pkg.re/check.v1"
 )
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+type timeoutError struct{}
+
+type errReader struct{}
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -58,8 +67,9 @@ func (rs *RedySuite) SetUpSuite(c *C) {
 
 func (rs *RedySuite) TestConnectionError(c *C) {
 	rc := &Client{
-		Network: "tcp",
-		Addr:    "127.0.0.255:60000",
+		Network:   "tcp",
+		Addr:      "127.0.0.255:60000",
+		TLSConfig: &tls.Config{},
 	}
 
 	resp := rc.Cmd("PING")
@@ -347,6 +357,41 @@ func (rs *RedySuite) TestRespRead(c *C) {
 	c.Assert(r.String(), Equals, "Resp(IOErr \"IOERR\")")
 }
 
+func (rs *RedySuite) TestReqEncoding(c *C) {
+	r := rs.c.Cmd("ECHO", 1)
+	c.Assert(r.Err, IsNil)
+
+	r = rs.c.Cmd("ECHO", nil)
+	c.Assert(r.Err, IsNil)
+
+	r = rs.c.Cmd("ECHO", true)
+	c.Assert(r.Err, IsNil)
+
+	r = rs.c.Cmd("ECHO", float32(1))
+	c.Assert(r.Err, IsNil)
+
+	r = rs.c.Cmd("ECHO", float64(1))
+	c.Assert(r.Err, IsNil)
+
+	r = rs.c.Cmd("ECHO", errors.New("TEST"))
+	c.Assert(r.Err, IsNil)
+
+	r = rs.c.Cmd("ECHO", &Resp{typ: SimpleStr, val: "TEST"})
+	c.Assert(r.Err, IsNil)
+
+	r = rs.c.Cmd("ECHO", Resp{typ: SimpleStr, val: "TEST"})
+	c.Assert(r.Err, IsNil)
+
+	r = rs.c.Cmd("ECHO", []interface{}{1})
+	c.Assert(r.Err, IsNil)
+
+	r = rs.c.Cmd("ECHO", []int{1})
+	c.Assert(r.Err, IsNil)
+
+	r = rs.c.Cmd("ECHO", time.Now())
+	c.Assert(r.Err, IsNil)
+}
+
 func (rs *RedySuite) TestRespReadErrors(c *C) {
 	r := &Resp{typ: Nil}
 	_, err := r.Bytes()
@@ -439,6 +484,24 @@ func (rs *RedySuite) TestInfoParser(c *C) {
 	c.Assert(info.GetI("server", "hz"), Equals, 10)
 	c.Assert(info.GetU("server", "hz"), Equals, uint64(10))
 	c.Assert(info.GetF("memory", "mem_fragmentation_ratio"), Not(Equals), 0.0)
+
+	r = &Resp{typ: Int, val: 1}
+	_, err = ParseInfo(r)
+	c.Assert(err, NotNil)
+
+	r = &Resp{typ: BulkStr, val: 1}
+	_, err = ParseInfo(r)
+	c.Assert(err, NotNil)
+
+	r = &Resp{typ: BulkStr, val: []byte("")}
+	_, err = ParseInfo(r)
+	c.Assert(err, NotNil)
+
+	c.Assert(info.Get("", ""), Equals, "")
+	c.Assert(info.Get("abcd", "abcd"), Equals, "")
+	c.Assert(info.GetI("", ""), Equals, -1)
+	c.Assert(info.GetF("", ""), Equals, float64(-1))
+	c.Assert(info.GetU("", ""), Equals, uint64(0))
 }
 
 func (rs *RedySuite) TestConfigParsers(c *C) {
@@ -466,7 +529,12 @@ func (rs *RedySuite) TestConfigParsers(c *C) {
 	c.Assert(fcAuth, Equals, "")
 	c.Assert(fcSave, Equals, "900 1 300 10 60 10000")
 
-	memConf, err := rs.c.GetConfig("ECHO")
+	memConf, err := rs.c.GetConfig("SET")
+
+	c.Assert(err, NotNil)
+	c.Assert(memConf, IsNil)
+
+	memConf, err = rs.c.GetConfig("PING")
 
 	c.Assert(err, NotNil)
 	c.Assert(memConf, IsNil)
@@ -523,6 +591,49 @@ func (rs *RedySuite) TestConfigDiff(c *C) {
 	c.Assert(diff, DeepEquals, []string{"b", "d", "e"})
 }
 
+func (rs *RedySuite) TestFlatten(c *C) {
+	s := []int{1, 2, 3, 4}
+	fs := flatten(s)
+	c.Assert(len(s), Equals, len(fs))
+	c.Assert(flattenedSliceLength(s), Equals, len(s))
+
+	m := map[string]int{"a": 1, "b": 2, "c": 3}
+	fm := flatten(m)
+	c.Assert(len(fm), Equals, len(m)*2)
+
+	b := []byte("test")
+	fb := flatten(b)
+	c.Assert(len(fb), Equals, 1)
+
+	fl := flattenedLength(
+		Resp{val: "A"},
+		&Resp{val: "A"},
+		[]int{1},
+		&timeoutError{},
+	)
+
+	c.Assert(flattenedLength(fl), Equals, 1)
+}
+
+func (rs *RedySuite) TestRead(c *C) {
+	r := bufio.NewReader(&errReader{})
+
+	_, err := readSimpleStr(r)
+	c.Assert(err, NotNil)
+
+	_, err = readError(r)
+	c.Assert(err, NotNil)
+
+	_, err = readInt(r)
+	c.Assert(err, NotNil)
+
+	_, err = readBulkStr(r)
+	c.Assert(err, NotNil)
+
+	_, err = readArray(r)
+	c.Assert(err, NotNil)
+}
+
 func (rs *RedySuite) TestAux(c *C) {
 	c.Assert(extractConfValue("abc"), Equals, "abc")
 
@@ -538,6 +649,30 @@ func (rs *RedySuite) TestAux(c *C) {
 	c.Assert(parseSize("512b"), Equals, uint64(512))
 	c.Assert(parseSize("kb"), Equals, uint64(0))
 	c.Assert(parseSize("123!"), Equals, uint64(0))
+
+	c.Assert(intv(int8(2)), Equals, int(2))
+	c.Assert(intv(int16(2)), Equals, int(2))
+	c.Assert(intv(int32(2)), Equals, int(2))
+	c.Assert(intv(int64(2)), Equals, int(2))
+	c.Assert(intv(uint(2)), Equals, int(2))
+	c.Assert(intv(uint8(2)), Equals, int(2))
+	c.Assert(intv(uint16(2)), Equals, int(2))
+	c.Assert(intv(uint32(2)), Equals, int(2))
+	c.Assert(intv(uint64(2)), Equals, int(2))
+	c.Assert(intv(""), Equals, int(-1))
+
+	r := &Resp{typ: IOErr, Err: &net.OpError{Err: &os.SyscallError{Err: &timeoutError{}}}}
+	c.Assert(isTimeout(r), Equals, true)
+
+	r = &Resp{}
+	c.Assert(isTimeout(r), Equals, false)
+
+	buf := bytes.NewBufferString("ABCD")
+	rdr := NewRespReader(buf)
+	_, err := bufioReadResp(rdr.r)
+	c.Assert(err, NotNil)
+
+	c.Assert(readField("", 0, true, ""), Equals, "")
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -564,4 +699,18 @@ func randString(length int) string {
 	}
 
 	return string(result)
+}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+func (t *timeoutError) Timeout() bool {
+	return true
+}
+
+func (t *timeoutError) Error() string {
+	return ""
+}
+
+func (r *errReader) Read(p []byte) (n int, err error) {
+	return 0, errors.New("ERROR")
 }
