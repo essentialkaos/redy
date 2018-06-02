@@ -124,6 +124,8 @@ func (i *Info) GetU(section, prop string) uint64 {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// codebeat:disable[ABC,LOC]
+
 func parseRedisInfo(rawInfo string) (*Info, error) {
 	if len(rawInfo) == 0 {
 		return nil, errors.New("INFO data is empty")
@@ -189,6 +191,8 @@ func parseRedisInfo(rawInfo string) (*Info, error) {
 	return info, nil
 }
 
+// codebeat:enable[ABC,LOC]
+
 func parseDBInfo(info string) *DBInfo {
 	kv, _ := strconv.ParseUint(readField(info, 1, false, "=", ","), 10, 64)
 	ev, _ := strconv.ParseUint(readField(info, 3, false, "=", ","), 10, 64)
@@ -196,6 +200,8 @@ func parseDBInfo(info string) *DBInfo {
 
 	return &DBInfo{Keys: kv, Expires: ev, AvgTTL: tv}
 }
+
+// codebeat:disable[CYCLO]
 
 func readField(data string, index int, multiSep bool, separators ...string) string {
 	if data == "" || index < 0 {
@@ -239,3 +245,5 @@ MAINLOOP:
 
 	return data[startPointer:]
 }
+
+// codebeat:enable[CYCLO]

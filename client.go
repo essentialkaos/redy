@@ -29,6 +29,8 @@ type Client struct {
 	DialTimeout  time.Duration
 	LastCritical error
 
+	ForceString bool
+
 	conn         net.Conn
 	respReader   *RespReader
 	writeScratch []byte
@@ -41,9 +43,11 @@ type Client struct {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// Errors
 var (
-	// ErrEmptyPipeline is empty pipeline error
-	ErrEmptyPipeline = errors.New("Pipeline is empty")
+	ErrEmptyPipeline     = errors.New("Pipeline is empty")
+	ErrNotConnected      = errors.New("Client not connected")
+	ErrWrongConfResponse = errors.New("CONFIG command response must have Array type")
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -88,6 +92,11 @@ func (c *Client) Connect() error {
 
 // Cmd calls the given Redis command
 func (c *Client) Cmd(cmd string, args ...interface{}) *Resp {
+	if c.conn == nil {
+		resp := errToResp(IOErr, ErrNotConnected)
+		return &resp
+	}
+
 	err := c.writeRequest(req{cmd, args})
 
 	if err != nil {
@@ -105,6 +114,11 @@ func (c *Client) PipeAppend(cmd string, args ...interface{}) {
 
 // PipeResp returns the reply for the next request in the pipeline queue
 func (c *Client) PipeResp() *Resp {
+	if c.conn == nil {
+		resp := errToResp(IOErr, ErrNotConnected)
+		return &resp
+	}
+
 	if len(c.completed) > 0 {
 		resp := c.completed[0]
 		c.completed = c.completed[1:]
@@ -153,6 +167,21 @@ func (c *Client) PipeClear() (int, int) {
 	return callCount, replyCount
 }
 
+// GetConfig read and parse full in-memory config
+func (c *Client) GetConfig(configCommand string) (*Config, error) {
+	resp := c.Cmd(configCommand, "GET", "*")
+
+	if resp.Err != nil {
+		return nil, resp.Err
+	}
+
+	if !resp.IsType(Array) {
+		return nil, ErrWrongConfResponse
+	}
+
+	return parseInMemoryConfig(resp)
+}
+
 // Close closes the connection
 func (c *Client) Close() error {
 	return c.conn.Close()
@@ -178,14 +207,14 @@ MAINLOOP:
 			break
 		}
 
-		_, err = writeTo(c.writeBuf, c.writeScratch, r.cmd, true, true)
+		_, err = writeTo(c.writeBuf, c.writeScratch, r.cmd)
 
 		if err != nil {
 			break
 		}
 
 		for _, arg := range r.args {
-			_, err = writeTo(c.writeBuf, c.writeScratch, arg, true, true)
+			_, err = writeTo(c.writeBuf, c.writeScratch, arg)
 
 			if err != nil {
 				break MAINLOOP
