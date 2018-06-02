@@ -29,8 +29,6 @@ type Client struct {
 	DialTimeout  time.Duration
 	LastCritical error
 
-	ForceString bool
-
 	conn         net.Conn
 	respReader   *RespReader
 	writeScratch []byte
@@ -45,9 +43,8 @@ type Client struct {
 
 // Errors
 var (
-	ErrEmptyPipeline     = errors.New("Pipeline is empty")
-	ErrNotConnected      = errors.New("Client not connected")
-	ErrWrongConfResponse = errors.New("CONFIG command response must have Array type")
+	ErrEmptyPipeline = errors.New("Pipeline is empty")
+	ErrNotConnected  = errors.New("Client not connected")
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -175,11 +172,7 @@ func (c *Client) GetConfig(configCommand string) (*Config, error) {
 		return nil, resp.Err
 	}
 
-	if !resp.IsType(Array) {
-		return nil, ErrWrongConfResponse
-	}
-
-	return parseInMemoryConfig(resp)
+	return ParseConfig(resp)
 }
 
 // Close closes the connection

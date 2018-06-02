@@ -20,6 +20,10 @@ type Config struct {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+var ErrWrongConfResponse = errors.New("CONFIG command response must have Array type")
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
 // ReadConfig read and parse Redis config
 func ReadConfig(file string) (*Config, error) {
 	fd, err := os.Open(file)
@@ -57,6 +61,15 @@ func ReadConfig(file string) (*Config, error) {
 	}
 
 	return config, nil
+}
+
+// ParseConfig parse full in-memory config
+func ParseConfig(r *Resp) (*Config, error) {
+	if !r.IsType(Array) {
+		return nil, ErrWrongConfResponse
+	}
+
+	return parseInMemoryConfig(r)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
