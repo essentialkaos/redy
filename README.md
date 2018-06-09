@@ -1,4 +1,4 @@
-<p align="center"><a href="#readme"><img src="https://gh.kaos.st/redy.svg"/></a></p>
+<p align="center"><a href="#readme"><img src="https://gh.kaos.st/go-redy.svg"/></a></p>
 
 <p align="center"><a href="#installation">Installation</a> • <a href="#usage-example">Usage example</a> • <a href="#build-status">Build Status</a> • <a href="#license">License</a></p>
 
