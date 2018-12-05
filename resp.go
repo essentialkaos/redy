@@ -17,17 +17,17 @@ import (
 // Different RespTypes. You can check if a message is of one or more types using
 // the IsType method on Resp
 const (
-	SimpleStr RespType = 1 << iota
-	BulkStr
-	Int
-	Array
-	Nil
+	STR_SIMPLE RespType = 1 << iota
+	STR_BULK
+	INT
+	ARRAY
+	NIL
 
-	IOErr
-	RedisErr
+	ERR_IO
+	ERR_REDIS
 
-	Str = SimpleStr | BulkStr
-	Err = IOErr | RedisErr
+	STR = STR_SIMPLE | STR_BULK
+	ERR = ERR_IO | ERR_REDIS
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -103,7 +103,7 @@ func (r *RespReader) Read() *Resp {
 	resp, err := bufioReadResp(r.r)
 
 	if err != nil {
-		resp = errToResp(IOErr, err)
+		resp = errToResp(ERR_IO, err)
 	}
 
 	return &resp
@@ -118,9 +118,9 @@ func (r *Resp) Bytes() ([]byte, error) {
 		return nil, r.Err
 	}
 
-	if r.IsType(Nil) {
+	if r.HasType(NIL) {
 		return nil, ErrRespNil
-	} else if !r.IsType(Str) {
+	} else if !r.HasType(STR) {
 		return nil, ErrBadType
 	}
 
@@ -156,7 +156,7 @@ func (r *Resp) Int64() (int64, error) {
 	switch {
 	case r.Err != nil:
 		return 0, r.Err
-	case r.IsType(Nil):
+	case r.HasType(NIL):
 		return 0, ErrRespNil
 	}
 
@@ -241,7 +241,7 @@ func (r *Resp) List() ([]string, error) {
 	list := make([]string, len(a))
 
 	for i := range a {
-		if a[i].IsType(Nil) {
+		if a[i].HasType(NIL) {
 			list[i] = ""
 			continue
 		}
@@ -275,7 +275,7 @@ func (r *Resp) ListBytes() ([][]byte, error) {
 	list := make([][]byte, len(a))
 
 	for i := range a {
-		if a[i].IsType(Nil) {
+		if a[i].HasType(NIL) {
 			list[i] = nil
 			continue
 		}
@@ -326,7 +326,7 @@ func (r *Resp) Map() (map[string]string, error) {
 			return nil, err
 		}
 
-		if v.IsType(Nil) {
+		if v.HasType(NIL) {
 			m[ks] = ""
 			continue
 		}
@@ -345,25 +345,25 @@ func (r *Resp) Map() (map[string]string, error) {
 // debugging, use Str() for reading a Str reply
 func (r *Resp) String() string {
 	switch r.typ {
-	case RedisErr:
+	case ERR_REDIS:
 		return fmt.Sprintf("Resp(RedisErr \"%s\")", r.Err)
 
-	case IOErr:
-		return fmt.Sprintf("Resp(IOErr \"%s\")", r.Err)
+	case ERR_IO:
+		return fmt.Sprintf("Resp(ErrIO \"%s\")", r.Err)
 
-	case BulkStr:
+	case STR_BULK:
 		return fmt.Sprintf("Resp(BulkStr %q)", string(r.val.([]byte)))
 
-	case SimpleStr:
+	case STR_SIMPLE:
 		return fmt.Sprintf("Resp(Str %q)", string(r.val.([]byte)))
 
-	case Int:
+	case INT:
 		return fmt.Sprintf("Resp(Int %d)", r.val.(int64))
 
-	case Nil:
+	case NIL:
 		return "Resp(Nil)"
 
-	case Array:
+	case ARRAY:
 		return arrayToString(r)
 
 	default:
@@ -371,8 +371,8 @@ func (r *Resp) String() string {
 	}
 }
 
-// IsType returns whether or or not the reply is of a given type
-func (r *Resp) IsType(t RespType) bool {
+// HasType returns whether or or not the reply is of a given type
+func (r *Resp) HasType(t RespType) bool {
 	return r.typ&t > 0
 }
 
@@ -413,7 +413,7 @@ func readSimpleStr(r *bufio.Reader) (Resp, error) {
 		return Resp{}, err
 	}
 
-	return Resp{nil, SimpleStr, b[1 : len(b)-2]}, nil
+	return Resp{nil, STR_SIMPLE, b[1 : len(b)-2]}, nil
 }
 
 func readError(r *bufio.Reader) (Resp, error) {
@@ -425,7 +425,7 @@ func readError(r *bufio.Reader) (Resp, error) {
 
 	err = errors.New(string(b[1 : len(b)-2]))
 
-	return errToResp(RedisErr, err), nil
+	return errToResp(ERR_REDIS, err), nil
 }
 
 func readInt(r *bufio.Reader) (Resp, error) {
@@ -441,7 +441,7 @@ func readInt(r *bufio.Reader) (Resp, error) {
 		return Resp{}, ErrParse
 	}
 
-	return Resp{nil, Int, i}, nil
+	return Resp{nil, INT, i}, nil
 }
 
 func readBulkStr(r *bufio.Reader) (Resp, error) {
@@ -457,7 +457,7 @@ func readBulkStr(r *bufio.Reader) (Resp, error) {
 	case err != nil:
 		return Resp{}, ErrParse
 	case size < 0:
-		return Resp{nil, Nil, nil}, nil
+		return Resp{nil, NIL, nil}, nil
 	}
 
 	data := make([]byte, size)
@@ -488,7 +488,7 @@ func readBulkStr(r *bufio.Reader) (Resp, error) {
 		trail[i] = c
 	}
 
-	return Resp{typ: BulkStr, val: data}, nil
+	return Resp{typ: STR_BULK, val: data}, nil
 }
 
 func readArray(r *bufio.Reader) (Resp, error) {
@@ -504,7 +504,7 @@ func readArray(r *bufio.Reader) (Resp, error) {
 	case err != nil:
 		return Resp{}, ErrParse
 	case size < 0:
-		return Resp{nil, Nil, nil}, nil
+		return Resp{nil, NIL, nil}, nil
 	}
 
 	data := make([]Resp, size)
@@ -519,7 +519,7 @@ func readArray(r *bufio.Reader) (Resp, error) {
 		data[i] = m
 	}
 
-	return Resp{typ: Array, val: data}, nil
+	return Resp{typ: ARRAY, val: data}, nil
 }
 
 func flatten(m interface{}) []interface{} {
@@ -842,7 +842,7 @@ func arrayToString(resp *Resp) string {
 }
 
 func isTimeout(resp *Resp) bool {
-	if resp.IsType(IOErr) {
+	if resp.HasType(ERR_IO) {
 		t, ok := resp.Err.(*net.OpError)
 		return ok && t.Timeout()
 	}

@@ -65,7 +65,7 @@ func ReadConfig(file string) (*Config, error) {
 
 // ParseConfig parse full in-memory config
 func ParseConfig(r *Resp) (*Config, error) {
-	if !r.IsType(Array) {
+	if !r.HasType(ARRAY) {
 		return nil, ErrWrongConfResponse
 	}
 
