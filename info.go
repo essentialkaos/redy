@@ -47,7 +47,7 @@ var defaultFieldsSeparators = []string{":"}
 
 // ParseInfo parses INFO command output
 func ParseInfo(r *Resp) (*Info, error) {
-	if !r.IsType(BulkStr) {
+	if !r.HasType(STR_BULK) {
 		return nil, errors.New("Can't parse INFO data: wrong resp type")
 	}
 

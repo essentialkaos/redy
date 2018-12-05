@@ -87,14 +87,14 @@ func (rs *RedySuite) TestCmd(c *C) {
 	respStr, err := r.Str()
 	c.Assert(r, NotNil)
 	c.Assert(r.Err, IsNil)
-	c.Assert(r.IsType(Str), Equals, true)
+	c.Assert(r.HasType(STR), Equals, true)
 	c.Assert(err, IsNil)
 	c.Assert(respStr, Equals, "TEST1234")
 
 	r = rs.c.Cmd("UNKNOWN_COMMAND")
 	c.Assert(r, NotNil)
 	c.Assert(r.Err, NotNil)
-	c.Assert(r.IsType(RedisErr), Equals, true)
+	c.Assert(r.HasType(ERR_REDIS), Equals, true)
 
 	key, val := randString(12), randString(64)
 	r = rs.c.Cmd("SADD", key, val)
@@ -147,7 +147,7 @@ func (rs *RedySuite) TestPipeline(c *C) {
 
 		r := rs.c.PipeResp()
 		c.Assert(r, NotNil)
-		c.Assert(r.IsType(RedisErr), Equals, true)
+		c.Assert(r.HasType(ERR_REDIS), Equals, true)
 		c.Assert(r.Err, Equals, ErrEmptyPipeline)
 	}
 
@@ -205,7 +205,7 @@ func (rs *RedySuite) TestRespRead(c *C) {
 
 	// Simple string
 	r = pretendRead("+TEST1234\r\n")
-	c.Assert(r.IsType(SimpleStr), Equals, true)
+	c.Assert(r.HasType(STR_SIMPLE), Equals, true)
 	c.Assert(r.val, DeepEquals, []byte("TEST1234"))
 	s, err := r.Str()
 	c.Assert(err, IsNil)
@@ -214,7 +214,7 @@ func (rs *RedySuite) TestRespRead(c *C) {
 
 	// Empty simple string
 	r = pretendRead("+\r\n")
-	c.Assert(r.IsType(SimpleStr), Equals, true)
+	c.Assert(r.HasType(STR_SIMPLE), Equals, true)
 	c.Assert(r.val, DeepEquals, []byte(""))
 	s, err = r.Str()
 	c.Assert(err, IsNil)
@@ -223,21 +223,21 @@ func (rs *RedySuite) TestRespRead(c *C) {
 
 	// Error
 	r = pretendRead("-TEST1234\r\n")
-	c.Assert(r.IsType(RedisErr), Equals, true)
+	c.Assert(r.HasType(ERR_REDIS), Equals, true)
 	c.Assert(r.val, DeepEquals, errors.New("TEST1234"))
 	c.Assert(r.Err.Error(), Equals, "TEST1234")
 	c.Assert(r.String(), Equals, "Resp(RedisErr \"TEST1234\")")
 
 	// Empty error
 	r = pretendRead("-\r\n")
-	c.Assert(r.IsType(RedisErr), Equals, true)
+	c.Assert(r.HasType(ERR_REDIS), Equals, true)
 	c.Assert(r.val, DeepEquals, errors.New(""))
 	c.Assert(r.Err.Error(), Equals, "")
 	c.Assert(r.String(), Equals, "Resp(RedisErr \"\")")
 
 	// Int
 	r = pretendRead(":1024\r\n")
-	c.Assert(r.IsType(Int), Equals, true)
+	c.Assert(r.HasType(INT), Equals, true)
 	c.Assert(r.val, Equals, int64(1024))
 	i, err := r.Int()
 	c.Assert(err, IsNil)
@@ -246,7 +246,7 @@ func (rs *RedySuite) TestRespRead(c *C) {
 
 	// Int (from string)
 	r = pretendRead("+50\r\n")
-	c.Assert(r.IsType(SimpleStr), Equals, true)
+	c.Assert(r.HasType(STR_SIMPLE), Equals, true)
 	c.Assert(r.val, DeepEquals, []byte("50"))
 	i, err = r.Int()
 	c.Assert(err, IsNil)
@@ -261,7 +261,7 @@ func (rs *RedySuite) TestRespRead(c *C) {
 
 	// Int (from string, can't parse)
 	r = pretendRead("+TEST1234\r\n")
-	c.Assert(r.IsType(SimpleStr), Equals, true)
+	c.Assert(r.HasType(STR_SIMPLE), Equals, true)
 	c.Assert(r.val, DeepEquals, []byte("TEST1234"))
 	_, err = r.Int()
 	c.Assert(err, NotNil)
@@ -269,7 +269,7 @@ func (rs *RedySuite) TestRespRead(c *C) {
 
 	// Bulk string
 	r = pretendRead("$8\r\nTEST1234\r\n")
-	c.Assert(r.IsType(BulkStr), Equals, true)
+	c.Assert(r.HasType(STR_BULK), Equals, true)
 	c.Assert(r.val, DeepEquals, []byte("TEST1234"))
 	s, err = r.Str()
 	c.Assert(err, IsNil)
@@ -278,7 +278,7 @@ func (rs *RedySuite) TestRespRead(c *C) {
 
 	// Empty bulk string
 	r = pretendRead("$0\r\n\r\n")
-	c.Assert(r.IsType(BulkStr), Equals, true)
+	c.Assert(r.HasType(STR_BULK), Equals, true)
 	c.Assert(r.val, DeepEquals, []byte(""))
 	s, err = r.Str()
 	c.Assert(err, IsNil)
@@ -287,16 +287,16 @@ func (rs *RedySuite) TestRespRead(c *C) {
 
 	// Nil bulk string
 	r = pretendRead("$-1\r\n")
-	c.Assert(r.IsType(Nil), Equals, true)
+	c.Assert(r.HasType(NIL), Equals, true)
 	c.Assert(r.String(), Equals, "Resp(Nil)")
 
 	// Array
 	r = pretendRead("*2\r\n+TEST\r\n+1234\r\n")
-	c.Assert(r.IsType(Array), Equals, true)
+	c.Assert(r.HasType(ARRAY), Equals, true)
 	c.Assert(len(r.val.([]Resp)), Equals, 2)
-	c.Assert(r.val.([]Resp)[0].IsType(SimpleStr), Equals, true)
+	c.Assert(r.val.([]Resp)[0].HasType(STR_SIMPLE), Equals, true)
 	c.Assert(r.val.([]Resp)[0].val, DeepEquals, []byte("TEST"))
-	c.Assert(r.val.([]Resp)[1].IsType(SimpleStr), Equals, true)
+	c.Assert(r.val.([]Resp)[1].HasType(STR_SIMPLE), Equals, true)
 	c.Assert(r.val.([]Resp)[1].val, DeepEquals, []byte("1234"))
 
 	l, err := r.List()
@@ -314,47 +314,47 @@ func (rs *RedySuite) TestRespRead(c *C) {
 
 	// Empty Array
 	r = pretendRead("*0\r\n")
-	c.Assert(r.IsType(Array), Equals, true)
+	c.Assert(r.HasType(ARRAY), Equals, true)
 	c.Assert(len(r.val.([]Resp)), Equals, 0)
 	c.Assert(r.String(), Equals, "Resp(Empty Array)")
 
 	// Nil Array
 	r = pretendRead("*-1\r\n")
-	c.Assert(r.IsType(Nil), Equals, true)
+	c.Assert(r.HasType(NIL), Equals, true)
 	c.Assert(r.String(), Equals, "Resp(Nil)")
 
 	// Embedded Array
 	r = pretendRead("*3\r\n+TEST\r\n+1234\r\n*2\r\n+STUB\r\n+5678\r\n")
 	c.Assert(r.String(), Equals, "Resp(0:Resp(Str \"TEST\") 1:Resp(Str \"1234\") 2:Resp(0:Resp(Str \"STUB\") 1:Resp(Str \"5678\")))")
-	c.Assert(r.IsType(Array), Equals, true)
+	c.Assert(r.HasType(ARRAY), Equals, true)
 	c.Assert(len(r.val.([]Resp)), Equals, 3)
-	c.Assert(r.val.([]Resp)[0].IsType(SimpleStr), Equals, true)
+	c.Assert(r.val.([]Resp)[0].HasType(STR_SIMPLE), Equals, true)
 	c.Assert(r.val.([]Resp)[0].val, DeepEquals, []byte("TEST"))
-	c.Assert(r.val.([]Resp)[1].IsType(SimpleStr), Equals, true)
+	c.Assert(r.val.([]Resp)[1].HasType(STR_SIMPLE), Equals, true)
 	c.Assert(r.val.([]Resp)[1].val, DeepEquals, []byte("1234"))
 	r = &r.val.([]Resp)[2]
-	c.Assert(r.IsType(Array), Equals, true)
+	c.Assert(r.HasType(ARRAY), Equals, true)
 	c.Assert(len(r.val.([]Resp)), Equals, 2)
-	c.Assert(r.val.([]Resp)[0].IsType(SimpleStr), Equals, true)
+	c.Assert(r.val.([]Resp)[0].HasType(STR_SIMPLE), Equals, true)
 	c.Assert(r.val.([]Resp)[0].val, DeepEquals, []byte("STUB"))
-	c.Assert(r.val.([]Resp)[1].IsType(SimpleStr), Equals, true)
+	c.Assert(r.val.([]Resp)[1].HasType(STR_SIMPLE), Equals, true)
 	c.Assert(r.val.([]Resp)[1].val, DeepEquals, []byte("5678"))
 
 	// Test that two bulks in a row read correctly
 	r = pretendRead("*2\r\n$4\r\nTEST\r\n$4\r\n1234\r\n")
 	c.Assert(r.String(), Equals, "Resp(0:Resp(BulkStr \"TEST\") 1:Resp(BulkStr \"1234\"))")
-	c.Assert(r.IsType(Array), Equals, true)
+	c.Assert(r.HasType(ARRAY), Equals, true)
 	c.Assert(len(r.val.([]Resp)), Equals, 2)
-	c.Assert(r.val.([]Resp)[0].IsType(BulkStr), Equals, true)
+	c.Assert(r.val.([]Resp)[0].HasType(STR_BULK), Equals, true)
 	c.Assert(r.val.([]Resp)[0].val, DeepEquals, []byte("TEST"))
-	c.Assert(r.val.([]Resp)[1].IsType(BulkStr), Equals, true)
+	c.Assert(r.val.([]Resp)[1].HasType(STR_BULK), Equals, true)
 	c.Assert(r.val.([]Resp)[1].val, DeepEquals, []byte("1234"))
 
 	r = &Resp{}
 	c.Assert(r.String(), Equals, "Resp(Unknown)")
 
-	r = &Resp{typ: IOErr, Err: errors.New("IOERR")}
-	c.Assert(r.String(), Equals, "Resp(IOErr \"IOERR\")")
+	r = &Resp{typ: ERR_IO, Err: errors.New("IOERR")}
+	c.Assert(r.String(), Equals, "Resp(ErrIO \"IOERR\")")
 }
 
 func (rs *RedySuite) TestReqEncoding(c *C) {
@@ -376,10 +376,10 @@ func (rs *RedySuite) TestReqEncoding(c *C) {
 	r = rs.c.Cmd("ECHO", errors.New("TEST"))
 	c.Assert(r.Err, IsNil)
 
-	r = rs.c.Cmd("ECHO", &Resp{typ: SimpleStr, val: "TEST"})
+	r = rs.c.Cmd("ECHO", &Resp{typ: STR_SIMPLE, val: "TEST"})
 	c.Assert(r.Err, IsNil)
 
-	r = rs.c.Cmd("ECHO", Resp{typ: SimpleStr, val: "TEST"})
+	r = rs.c.Cmd("ECHO", Resp{typ: STR_SIMPLE, val: "TEST"})
 	c.Assert(r.Err, IsNil)
 
 	r = rs.c.Cmd("ECHO", []interface{}{1})
@@ -393,13 +393,13 @@ func (rs *RedySuite) TestReqEncoding(c *C) {
 }
 
 func (rs *RedySuite) TestRespReadErrors(c *C) {
-	r := &Resp{typ: Nil}
+	r := &Resp{typ: NIL}
 	_, err := r.Bytes()
 	c.Assert(err, NotNil)
 	_, err = r.Int64()
 	c.Assert(err, NotNil)
 
-	r = &Resp{typ: Array, val: -1}
+	r = &Resp{typ: ARRAY, val: -1}
 	_, err = r.Bytes()
 	c.Assert(err, NotNil)
 	_, err = r.Float64()
@@ -411,7 +411,7 @@ func (rs *RedySuite) TestRespReadErrors(c *C) {
 	_, err = r.Map()
 	c.Assert(err, NotNil)
 
-	r = &Resp{typ: BulkStr, val: -1}
+	r = &Resp{typ: STR_BULK, val: -1}
 	_, err = r.Bytes()
 	c.Assert(err, NotNil)
 
@@ -431,37 +431,37 @@ func (rs *RedySuite) TestRespReadErrors(c *C) {
 	_, err = r.Map()
 	c.Assert(err, NotNil)
 
-	r = &Resp{typ: BulkStr, val: "abc"}
+	r = &Resp{typ: STR_BULK, val: "abc"}
 	_, err = r.Int64()
 	c.Assert(err, NotNil)
 
-	r = &Resp{typ: BulkStr, val: []byte("abc")}
+	r = &Resp{typ: STR_BULK, val: []byte("abc")}
 	_, err = r.Float64()
 	c.Assert(err, NotNil)
 
-	r = &Resp{typ: Array, val: []Resp{Resp{typ: Nil}, Resp{typ: Str, val: -1}}}
+	r = &Resp{typ: ARRAY, val: []Resp{Resp{typ: NIL}, Resp{typ: STR, val: -1}}}
 	_, err = r.List()
 	c.Assert(err, NotNil)
 	_, err = r.ListBytes()
 	c.Assert(err, NotNil)
 
-	r = &Resp{typ: Array, val: []Resp{Resp{typ: Nil}}}
+	r = &Resp{typ: ARRAY, val: []Resp{Resp{typ: NIL}}}
 	_, err = r.Map()
 	c.Assert(err, NotNil)
 
-	r = &Resp{typ: Array, val: []Resp{
-		Resp{typ: Str, val: -1},
-		Resp{typ: Nil},
+	r = &Resp{typ: ARRAY, val: []Resp{
+		Resp{typ: STR, val: -1},
+		Resp{typ: NIL},
 	}}
 
 	_, err = r.Map()
 	c.Assert(err, NotNil)
 
-	r = &Resp{typ: Array, val: []Resp{
-		Resp{typ: Str, val: []byte("abc")},
-		Resp{typ: Nil},
-		Resp{typ: Str, val: []byte("abcd")},
-		Resp{typ: Str, val: -1},
+	r = &Resp{typ: ARRAY, val: []Resp{
+		Resp{typ: STR, val: []byte("abc")},
+		Resp{typ: NIL},
+		Resp{typ: STR, val: []byte("abcd")},
+		Resp{typ: STR, val: -1},
 	}}
 
 	_, err = r.Map()
@@ -473,7 +473,7 @@ func (rs *RedySuite) TestInfoParser(c *C) {
 
 	c.Assert(r, NotNil)
 	c.Assert(r.Err, IsNil)
-	c.Assert(r.IsType(BulkStr), Equals, true)
+	c.Assert(r.HasType(STR_BULK), Equals, true)
 
 	info, err := ParseInfo(r)
 
@@ -485,15 +485,15 @@ func (rs *RedySuite) TestInfoParser(c *C) {
 	c.Assert(info.GetU("server", "hz"), Equals, uint64(10))
 	c.Assert(info.GetF("memory", "mem_fragmentation_ratio"), Not(Equals), 0.0)
 
-	r = &Resp{typ: Int, val: 1}
+	r = &Resp{typ: INT, val: 1}
 	_, err = ParseInfo(r)
 	c.Assert(err, NotNil)
 
-	r = &Resp{typ: BulkStr, val: 1}
+	r = &Resp{typ: STR_BULK, val: 1}
 	_, err = ParseInfo(r)
 	c.Assert(err, NotNil)
 
-	r = &Resp{typ: BulkStr, val: []byte("")}
+	r = &Resp{typ: STR_BULK, val: []byte("")}
 	_, err = ParseInfo(r)
 	c.Assert(err, NotNil)
 
@@ -549,11 +549,11 @@ func (rs *RedySuite) TestConfigParsers(c *C) {
 	c.Assert(memConf.Get("save"), Equals, fcSave)
 	c.Assert(memConf.Get("client-output-buffer-limit"), Equals, fcLimit)
 
-	resp := &Resp{typ: SimpleStr, val: ""}
+	resp := &Resp{typ: STR_SIMPLE, val: ""}
 	_, err = parseInMemoryConfig(resp)
 	c.Assert(err, NotNil)
 
-	resp = &Resp{typ: Array, val: []Resp{Resp{}, Resp{}, Resp{}}}
+	resp = &Resp{typ: ARRAY, val: []Resp{Resp{}, Resp{}, Resp{}}}
 	_, err = parseInMemoryConfig(resp)
 	c.Assert(err, NotNil)
 }
@@ -661,7 +661,7 @@ func (rs *RedySuite) TestAux(c *C) {
 	c.Assert(intv(uint64(2)), Equals, int(2))
 	c.Assert(intv(""), Equals, int(-1))
 
-	r := &Resp{typ: IOErr, Err: &net.OpError{Err: &os.SyscallError{Err: &timeoutError{}}}}
+	r := &Resp{typ: ERR_IO, Err: &net.OpError{Err: &os.SyscallError{Err: &timeoutError{}}}}
 	c.Assert(isTimeout(r), Equals, true)
 
 	r = &Resp{}

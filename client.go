@@ -90,14 +90,14 @@ func (c *Client) Connect() error {
 // Cmd calls the given Redis command
 func (c *Client) Cmd(cmd string, args ...interface{}) *Resp {
 	if c.conn == nil {
-		resp := errToResp(IOErr, ErrNotConnected)
+		resp := errToResp(ERR_IO, ErrNotConnected)
 		return &resp
 	}
 
 	err := c.writeRequest(req{cmd, args})
 
 	if err != nil {
-		resp := errToResp(IOErr, err)
+		resp := errToResp(ERR_IO, err)
 		return &resp
 	}
 
@@ -112,7 +112,7 @@ func (c *Client) PipeAppend(cmd string, args ...interface{}) {
 // PipeResp returns the reply for the next request in the pipeline queue
 func (c *Client) PipeResp() *Resp {
 	if c.conn == nil {
-		resp := errToResp(IOErr, ErrNotConnected)
+		resp := errToResp(ERR_IO, ErrNotConnected)
 		return &resp
 	}
 
@@ -123,7 +123,7 @@ func (c *Client) PipeResp() *Resp {
 	}
 
 	if len(c.pending) == 0 {
-		resp := errToResp(RedisErr, ErrEmptyPipeline)
+		resp := errToResp(ERR_REDIS, ErrEmptyPipeline)
 		return &resp
 	}
 
@@ -133,7 +133,7 @@ func (c *Client) PipeResp() *Resp {
 	c.pending = nil
 
 	if err != nil {
-		resp := errToResp(IOErr, err)
+		resp := errToResp(ERR_IO, err)
 		return &resp
 	}
 
@@ -236,7 +236,7 @@ func (c *Client) readResp(strict bool) *Resp {
 
 	resp := c.respReader.Read()
 
-	if resp.IsType(IOErr) && (strict || !isTimeout(resp)) {
+	if resp.HasType(ERR_IO) && (strict || !isTimeout(resp)) {
 		c.LastCritical = resp.Err
 		c.Close()
 	}
