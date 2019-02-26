@@ -56,13 +56,14 @@ type RespReader struct {
 
 // Errors
 var (
-	ErrBadType  = errors.New("Wrong type")
-	ErrParse    = errors.New("Parse error")
-	ErrNotStr   = errors.New("Couldn't convert response to string")
-	ErrNotInt   = errors.New("Couldn't convert response to int")
-	ErrNotArray = errors.New("Couldn't convert response to array")
-	ErrNotMap   = errors.New("Couldn't convert response to map (reply has odd number of elements)")
-	ErrRespNil  = errors.New("Response is nil")
+	ErrBadType    = errors.New("Wrong type")
+	ErrParse      = errors.New("Parse error")
+	ErrNotStr     = errors.New("Couldn't convert response to string")
+	ErrNotInt     = errors.New("Couldn't convert response to int")
+	ErrNotArray   = errors.New("Couldn't convert response to array")
+	ErrNotMap     = errors.New("Couldn't convert response to map (reply has odd number of elements)")
+	ErrRespNil    = errors.New("Response is nil")
+	ErrRespTooBig = errors.New("Response is huge and can't be parsed")
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -413,6 +414,10 @@ func readSimpleStr(r *bufio.Reader) (Resp, error) {
 		return Resp{}, err
 	}
 
+	if len(b) < 3 {
+		return Resp{}, ErrParse
+	}
+
 	return Resp{nil, STR_SIMPLE, b[1 : len(b)-2]}, nil
 }
 
@@ -421,6 +426,10 @@ func readError(r *bufio.Reader) (Resp, error) {
 
 	if err != nil {
 		return Resp{}, err
+	}
+
+	if len(b) < 3 {
+		return Resp{}, ErrParse
 	}
 
 	err = errors.New(string(b[1 : len(b)-2]))
@@ -433,6 +442,10 @@ func readInt(r *bufio.Reader) (Resp, error) {
 
 	if err != nil {
 		return Resp{}, err
+	}
+
+	if len(b) < 3 {
+		return Resp{}, ErrParse
 	}
 
 	i, err := strconv.ParseInt(string(b[1:len(b)-2]), 10, 64)
@@ -451,11 +464,17 @@ func readBulkStr(r *bufio.Reader) (Resp, error) {
 		return Resp{}, err
 	}
 
+	if len(b) < 3 {
+		return Resp{}, ErrParse
+	}
+
 	size, err := strconv.ParseInt(string(b[1:len(b)-2]), 10, 64)
 
 	switch {
 	case err != nil:
 		return Resp{}, ErrParse
+	case size > 512*1024*1024:
+		return Resp{}, ErrRespTooBig
 	case size < 0:
 		return Resp{nil, NIL, nil}, nil
 	}
@@ -498,6 +517,10 @@ func readArray(r *bufio.Reader) (Resp, error) {
 		return Resp{}, err
 	}
 
+	if len(b) < 3 {
+		return Resp{}, ErrParse
+	}
+
 	size, err := strconv.ParseInt(string(b[1:len(b)-2]), 10, 64)
 
 	switch {
@@ -507,16 +530,16 @@ func readArray(r *bufio.Reader) (Resp, error) {
 		return Resp{nil, NIL, nil}, nil
 	}
 
-	data := make([]Resp, size)
+	data := make([]Resp, 0)
 
-	for i := range data {
+	for i := int64(0); i < size; i++ {
 		m, err := bufioReadResp(r)
 
 		if err != nil {
 			return Resp{}, err
 		}
 
-		data[i] = m
+		data = append(data, m)
 	}
 
 	return Resp{typ: ARRAY, val: data}, nil
