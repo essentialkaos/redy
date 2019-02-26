@@ -673,6 +673,12 @@ func (rs *RedySuite) TestAux(c *C) {
 	c.Assert(err, NotNil)
 
 	c.Assert(readField("", 0, true, ""), Equals, "")
+
+	dbi := parseDBInfo("keys=22219,expires=20994,avg_ttl=298990394")
+
+	c.Assert(dbi.Keys, Equals, uint64(22219))
+	c.Assert(dbi.Expires, Equals, uint64(20994))
+	c.Assert(dbi.AvgTTL, Equals, uint64(298990394))
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
