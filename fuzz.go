@@ -12,7 +12,8 @@ import (
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 func FuzzInfoParser(data []byte) int {
-	_, err := parseRedisInfo(string(data))
+	b := bytes.NewBuffer(data)
+	_, err := parseRedisInfo(b.String())
 
 	if err != nil {
 		return 0
