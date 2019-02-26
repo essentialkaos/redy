@@ -34,33 +34,7 @@ func ReadConfig(file string) (*Config, error) {
 
 	defer fd.Close()
 
-	reader := bufio.NewReader(fd)
-	scanner := bufio.NewScanner(reader)
-
-	config := &Config{
-		Props: make([]string, 0),
-		Data:  make(map[string][]string),
-	}
-
-	for scanner.Scan() {
-		line := strings.TrimRight(scanner.Text(), "\r")
-		line = strings.Trim(line, " ")
-
-		if len(line) == 0 || strings.HasPrefix(line, "#") || !strings.Contains(line, " ") {
-			continue
-		}
-
-		p := readField(line, 0, false, " ")
-
-		if config.Data[p] == nil {
-			config.Props = append(config.Props, p)
-			config.Data[p] = []string{extractConfValue(line)}
-		} else {
-			config.Data[p] = append(config.Data[p], extractConfValue(line))
-		}
-	}
-
-	return config, nil
+	return parseConfigData(bufio.NewReader(fd))
 }
 
 // ParseConfig parse full in-memory config
@@ -119,6 +93,35 @@ func (c *Config) Diff(nc *Config) []string {
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
+
+func parseConfigData(r *bufio.Reader) (*Config, error) {
+	scanner := bufio.NewScanner(r)
+
+	config := &Config{
+		Props: make([]string, 0),
+		Data:  make(map[string][]string),
+	}
+
+	for scanner.Scan() {
+		line := strings.TrimRight(scanner.Text(), "\r")
+		line = strings.Trim(line, " ")
+
+		if len(line) == 0 || strings.HasPrefix(line, "#") || !strings.Contains(line, " ") {
+			continue
+		}
+
+		p := readField(line, 0, false, " ")
+
+		if config.Data[p] == nil {
+			config.Props = append(config.Props, p)
+			config.Data[p] = []string{extractConfValue(line)}
+		} else {
+			config.Data[p] = append(config.Data[p], extractConfValue(line))
+		}
+	}
+
+	return config, nil
+}
 
 func parseInMemoryConfig(r *Resp) (*Config, error) {
 	items, err := r.Array()
