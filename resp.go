@@ -56,13 +56,14 @@ type RespReader struct {
 
 // Errors
 var (
-	ErrBadType  = errors.New("Wrong type")
-	ErrParse    = errors.New("Parse error")
-	ErrNotStr   = errors.New("Couldn't convert response to string")
-	ErrNotInt   = errors.New("Couldn't convert response to int")
-	ErrNotArray = errors.New("Couldn't convert response to array")
-	ErrNotMap   = errors.New("Couldn't convert response to map (reply has odd number of elements)")
-	ErrRespNil  = errors.New("Response is nil")
+	ErrBadType    = errors.New("Wrong type")
+	ErrParse      = errors.New("Parse error")
+	ErrNotStr     = errors.New("Couldn't convert response to string")
+	ErrNotInt     = errors.New("Couldn't convert response to int")
+	ErrNotArray   = errors.New("Couldn't convert response to array")
+	ErrNotMap     = errors.New("Couldn't convert response to map (reply has odd number of elements)")
+	ErrRespNil    = errors.New("Response is nil")
+	ErrRespTooBig = errors.New("Response is huge and can't be parsed")
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -472,6 +473,8 @@ func readBulkStr(r *bufio.Reader) (Resp, error) {
 	switch {
 	case err != nil:
 		return Resp{}, ErrParse
+	case size > 512*1024*1024:
+		return Resp{}, ErrRespTooBig
 	case size < 0:
 		return Resp{nil, NIL, nil}, nil
 	}
@@ -527,16 +530,16 @@ func readArray(r *bufio.Reader) (Resp, error) {
 		return Resp{nil, NIL, nil}, nil
 	}
 
-	data := make([]Resp, size)
+	data := make([]Resp, 0)
 
-	for i := range data {
+	for i := int64(0); i < size; i++ {
 		m, err := bufioReadResp(r)
 
 		if err != nil {
 			return Resp{}, err
 		}
 
-		data[i] = m
+		data = append(data, m)
 	}
 
 	return Resp{typ: ARRAY, val: data}, nil

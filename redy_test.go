@@ -493,6 +493,11 @@ func (rs *RedySuite) TestRespReadParseErrors(c *C) {
 	br = bufio.NewReader(rd)
 	_, err = readArray(br)
 	c.Assert(err, NotNil)
+
+	rd = bytes.NewBuffer(append(prefixBulk, []byte("1000000000000000\n")...))
+	br = bufio.NewReader(rd)
+	_, err = readBulkStr(br)
+	c.Assert(err, NotNil)
 }
 
 func (rs *RedySuite) TestInfoParser(c *C) {
