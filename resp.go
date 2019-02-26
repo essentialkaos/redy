@@ -413,6 +413,10 @@ func readSimpleStr(r *bufio.Reader) (Resp, error) {
 		return Resp{}, err
 	}
 
+	if len(b) <= 3 {
+		return Resp{}, ErrParse
+	}
+
 	return Resp{nil, STR_SIMPLE, b[1 : len(b)-2]}, nil
 }
 
@@ -421,6 +425,10 @@ func readError(r *bufio.Reader) (Resp, error) {
 
 	if err != nil {
 		return Resp{}, err
+	}
+
+	if len(b) <= 3 {
+		return Resp{}, ErrParse
 	}
 
 	err = errors.New(string(b[1 : len(b)-2]))
@@ -433,6 +441,10 @@ func readInt(r *bufio.Reader) (Resp, error) {
 
 	if err != nil {
 		return Resp{}, err
+	}
+
+	if len(b) <= 3 {
+		return Resp{}, ErrParse
 	}
 
 	i, err := strconv.ParseInt(string(b[1:len(b)-2]), 10, 64)
@@ -449,6 +461,10 @@ func readBulkStr(r *bufio.Reader) (Resp, error) {
 
 	if err != nil {
 		return Resp{}, err
+	}
+
+	if len(b) <= 3 {
+		return Resp{}, ErrParse
 	}
 
 	size, err := strconv.ParseInt(string(b[1:len(b)-2]), 10, 64)
@@ -496,6 +512,10 @@ func readArray(r *bufio.Reader) (Resp, error) {
 
 	if err != nil {
 		return Resp{}, err
+	}
+
+	if len(b) <= 3 {
+		return Resp{}, ErrParse
 	}
 
 	size, err := strconv.ParseInt(string(b[1:len(b)-2]), 10, 64)
