@@ -468,6 +468,33 @@ func (rs *RedySuite) TestRespReadErrors(c *C) {
 	c.Assert(err, NotNil)
 }
 
+func (rs *RedySuite) TestRespReadParseErrors(c *C) {
+	rd := bytes.NewBuffer(append(prefixStr, '\n'))
+	br := bufio.NewReader(rd)
+	_, err := readSimpleStr(br)
+	c.Assert(err, NotNil)
+
+	rd = bytes.NewBuffer(append(prefixErr, '\n'))
+	br = bufio.NewReader(rd)
+	_, err = readError(br)
+	c.Assert(err, NotNil)
+
+	rd = bytes.NewBuffer(append(prefixInt, '\n'))
+	br = bufio.NewReader(rd)
+	_, err = readInt(br)
+	c.Assert(err, NotNil)
+
+	rd = bytes.NewBuffer(append(prefixBulk, '\n'))
+	br = bufio.NewReader(rd)
+	_, err = readBulkStr(br)
+	c.Assert(err, NotNil)
+
+	rd = bytes.NewBuffer(append(prefixArray, '\n'))
+	br = bufio.NewReader(rd)
+	_, err = readArray(br)
+	c.Assert(err, NotNil)
+}
+
 func (rs *RedySuite) TestInfoParser(c *C) {
 	r := rs.c.Cmd("INFO")
 

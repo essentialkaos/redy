@@ -413,7 +413,7 @@ func readSimpleStr(r *bufio.Reader) (Resp, error) {
 		return Resp{}, err
 	}
 
-	if len(b) <= 3 {
+	if len(b) < 3 {
 		return Resp{}, ErrParse
 	}
 
@@ -427,7 +427,7 @@ func readError(r *bufio.Reader) (Resp, error) {
 		return Resp{}, err
 	}
 
-	if len(b) <= 3 {
+	if len(b) < 3 {
 		return Resp{}, ErrParse
 	}
 
@@ -443,7 +443,7 @@ func readInt(r *bufio.Reader) (Resp, error) {
 		return Resp{}, err
 	}
 
-	if len(b) <= 3 {
+	if len(b) < 3 {
 		return Resp{}, ErrParse
 	}
 
@@ -463,7 +463,7 @@ func readBulkStr(r *bufio.Reader) (Resp, error) {
 		return Resp{}, err
 	}
 
-	if len(b) <= 3 {
+	if len(b) < 3 {
 		return Resp{}, ErrParse
 	}
 
@@ -514,7 +514,7 @@ func readArray(r *bufio.Reader) (Resp, error) {
 		return Resp{}, err
 	}
 
-	if len(b) <= 3 {
+	if len(b) < 3 {
 		return Resp{}, ErrParse
 	}
 
