@@ -485,17 +485,35 @@ func (rs *RedySuite) TestInfoParser(c *C) {
 	c.Assert(info.GetU("server", "hz"), Equals, uint64(10))
 	c.Assert(info.GetF("memory", "mem_fragmentation_ratio"), Not(Equals), 0.0)
 
+	// --
+
 	r = &Resp{typ: INT, val: 1}
 	_, err = ParseInfo(r)
 	c.Assert(err, NotNil)
+
+	// --
 
 	r = &Resp{typ: STR_BULK, val: 1}
 	_, err = ParseInfo(r)
 	c.Assert(err, NotNil)
 
+	// --
+
 	r = &Resp{typ: STR_BULK, val: []byte("")}
 	_, err = ParseInfo(r)
 	c.Assert(err, NotNil)
+
+	c.Assert(info.Get("", ""), Equals, "")
+	c.Assert(info.Get("abcd", "abcd"), Equals, "")
+	c.Assert(info.GetI("", ""), Equals, -1)
+	c.Assert(info.GetF("", ""), Equals, float64(-1))
+	c.Assert(info.GetU("", ""), Equals, uint64(0))
+
+	// --
+
+	r = &Resp{typ: STR_BULK, val: []byte("abcd\nabcd\n#abcd\nabcd")}
+	_, err = ParseInfo(r)
+	c.Assert(err, IsNil)
 
 	c.Assert(info.Get("", ""), Equals, "")
 	c.Assert(info.Get("abcd", "abcd"), Equals, "")
@@ -634,6 +652,20 @@ func (rs *RedySuite) TestRead(c *C) {
 	c.Assert(err, NotNil)
 }
 
+func (rs *RedySuite) TestKeyspaceInfoParser(c *C) {
+	info := parseDBInfo("keys=22219,expires=20994,avg_ttl=298990394")
+
+	c.Assert(info.Keys, Equals, uint64(22219))
+	c.Assert(info.Expires, Equals, uint64(20994))
+	c.Assert(info.AvgTTL, Equals, uint64(298990394))
+
+	info = parseDBInfo(" ")
+
+	c.Assert(info.Keys, Equals, uint64(0))
+	c.Assert(info.Expires, Equals, uint64(0))
+	c.Assert(info.AvgTTL, Equals, uint64(0))
+}
+
 func (rs *RedySuite) TestAux(c *C) {
 	c.Assert(extractConfValue("abc"), Equals, "abc")
 
@@ -673,12 +705,6 @@ func (rs *RedySuite) TestAux(c *C) {
 	c.Assert(err, NotNil)
 
 	c.Assert(readField("", 0, true, ""), Equals, "")
-
-	dbi := parseDBInfo("keys=22219,expires=20994,avg_ttl=298990394")
-
-	c.Assert(dbi.Keys, Equals, uint64(22219))
-	c.Assert(dbi.Expires, Equals, uint64(20994))
-	c.Assert(dbi.AvgTTL, Equals, uint64(298990394))
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
