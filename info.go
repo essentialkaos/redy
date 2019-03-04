@@ -35,7 +35,7 @@ type DBInfo struct {
 // InfoSection contains section info
 type InfoSection struct {
 	Header string
-	Props  []string
+	Fields []string
 	Values map[string]string
 }
 
@@ -68,9 +68,9 @@ func ParseInfo(r *Resp) (*Info, error) {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// Get return property value as string
-func (i *Info) Get(section, prop string) string {
-	if i == nil || section == "" || prop == "" {
+// Get returns field value as string
+func (i *Info) Get(section, field string) string {
+	if i == nil || section == "" || field == "" {
 		return ""
 	}
 
@@ -80,12 +80,12 @@ func (i *Info) Get(section, prop string) string {
 		return ""
 	}
 
-	return s.Values[strings.ToLower(prop)]
+	return s.Values[strings.ToLower(field)]
 }
 
-// GetI return property value as int
-func (i *Info) GetI(section, prop string) int {
-	rs := i.Get(section, prop)
+// GetI returns field value as int
+func (i *Info) GetI(section, field string) int {
+	rs := i.Get(section, field)
 
 	if rs == "" {
 		return -1
@@ -96,9 +96,9 @@ func (i *Info) GetI(section, prop string) int {
 	return ri
 }
 
-// GetF return property value as float64
-func (i *Info) GetF(section, prop string) float64 {
-	rs := i.Get(section, prop)
+// GetF returns field value as float64
+func (i *Info) GetF(section, field string) float64 {
+	rs := i.Get(section, field)
 
 	if rs == "" {
 		return -1
@@ -109,9 +109,9 @@ func (i *Info) GetF(section, prop string) float64 {
 	return rf
 }
 
-// GetU return property value as uint64
-func (i *Info) GetU(section, prop string) uint64 {
-	rs := i.Get(section, prop)
+// GetU returns field value as uint64
+func (i *Info) GetU(section, field string) uint64 {
+	rs := i.Get(section, field)
 
 	if rs == "" {
 		return 0
@@ -152,7 +152,7 @@ func parseRedisInfo(rawInfo string) (*Info, error) {
 		if strings.HasPrefix(sectionName, "#") {
 			section = &InfoSection{
 				Header: strings.TrimPrefix(sectionName, "# "),
-				Props:  make([]string, 0),
+				Fields: make([]string, 0),
 				Values: make(map[string]string),
 			}
 
@@ -172,7 +172,7 @@ func parseRedisInfo(rawInfo string) (*Info, error) {
 
 			k := readField(sectionName, 0, false)
 
-			section.Props = append(section.Props, k)
+			section.Fields = append(section.Fields, k)
 			section.Values[k] = v
 
 			if section.Header == "Keyspace" {
