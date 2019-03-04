@@ -3,7 +3,7 @@
 <p align="center"><a href="#installation">Installation</a> • <a href="#usage-example">Usage example</a> • <a href="#build-status">Build Status</a> • <a href="#license">License</a></p>
 
 <p align="center">
-  <a href="https://godoc.org/pkg.re/essentialkaos/redy.v2"><img src="https://godoc.org/pkg.re/essentialkaos/redy.v2?status.svg"></a>
+  <a href="https://godoc.org/pkg.re/essentialkaos/redy.v3"><img src="https://godoc.org/pkg.re/essentialkaos/redy.v3?status.svg"></a>
   <a href="https://goreportcard.com/report/github.com/essentialkaos/redy"><img src="https://goreportcard.com/badge/github.com/essentialkaos/redy"></a>
   <a href="https://codebeat.co/projects/github-com-essentialkaos-redy-master"><img alt="codebeat badge" src="https://codebeat.co/badges/1398d17c-e335-43c7-92d7-3aa484b2454c" /></a>
   <a href="https://travis-ci.org/essentialkaos/redy"><img src="https://travis-ci.org/essentialkaos/redy.svg"></a>
@@ -24,13 +24,13 @@ git config --global http.https://pkg.re.followRedirects true
 Make sure you have a working Go 1.8+ workspace (_[instructions](https://golang.org/doc/install)_), then:
 
 ```
-go get pkg.re/essentialkaos/redy.v2
+go get pkg.re/essentialkaos/redy.v3
 ```
 
 For update to latest stable release, do:
 
 ```
-go get -u pkg.re/essentialkaos/redy.v2
+go get -u pkg.re/essentialkaos/redy.v3
 ```
 
 ### Usage example
@@ -41,7 +41,7 @@ import (
   "fmt"
   "time"
 
-  "pkg.re/essentialkaos/redy.v2"
+  "pkg.re/essentialkaos/redy.v3"
 )
 
 func main() {
