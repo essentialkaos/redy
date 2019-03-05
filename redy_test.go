@@ -517,6 +517,13 @@ func (rs *RedySuite) TestInfoParser(c *C) {
 	c.Assert(info.GetU("server", "hz"), Equals, uint64(10))
 	c.Assert(info.GetF("memory", "mem_fragmentation_ratio"), Not(Equals), 0.0)
 
+	flatInfo := info.Flatten()
+
+	c.Assert(flatInfo, Not(HasLen), 0)
+	c.Assert(flatInfo[0], HasLen, 2)
+	c.Assert(flatInfo[0][0], Not(Equals), "")
+	c.Assert(flatInfo[0][1], Not(Equals), "")
+
 	// --
 
 	r = &Resp{typ: INT, val: 1}

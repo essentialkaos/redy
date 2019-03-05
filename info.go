@@ -68,6 +68,19 @@ func ParseInfo(r *Resp) (*Info, error) {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// Flatten flatten info data
+func (i *Info) Flatten() [][2]string {
+	var result [][2]string
+
+	for _, section := range i.Sections {
+		for _, field := range section.Fields {
+			result = append(result, [2]string{field, section.Values[field]})
+		}
+	}
+
+	return result
+}
+
 // Get returns field value as string
 func (i *Info) Get(section, field string) string {
 	if i == nil || section == "" || field == "" {
