@@ -20,9 +20,8 @@ type Info struct {
 
 // KeyspaceInfo contains info about keyspace
 type KeyspaceInfo struct {
-	Databases []string
-	DBList    map[string]*DBInfo
-	Total     *DBInfo
+	Databases []int
+	DBList    map[int]*DBInfo
 }
 
 // DBInfo contains info about single db
@@ -77,6 +76,15 @@ func (i *Info) Flatten() [][2]string {
 			result = append(result, [2]string{field, section.Values[field]})
 		}
 	}
+
+	for db, dbInfo := range i.Keyspace.DBList {
+		dbName := "db" + strconv.Itoa(db)
+		result = append(result, [2]string{dbName + "_keys", fmt.Sprintf("%d", dbInfo.Keys)})
+		result = append(result, [2]string{dbName + "_expires", fmt.Sprintf("%d", dbInfo.Expires)})
+	}
+
+	result = append(result, [2]string{"keys_total", fmt.Sprintf("%d", i.Keyspace.Keys())})
+	result = append(result, [2]string{"expires_total", fmt.Sprintf("%d", i.Keyspace.Expires())})
 
 	return result
 }
@@ -137,6 +145,30 @@ func (i *Info) GetU(section, field string) uint64 {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// Keys calculates number of keys
+func (k *KeyspaceInfo) Keys() uint64 {
+	var result uint64
+
+	for _, i := range k.DBList {
+		result += i.Keys
+	}
+
+	return result
+}
+
+// Expires calculates number of expires
+func (k *KeyspaceInfo) Expires() uint64 {
+	var result uint64
+
+	for _, i := range k.DBList {
+		result += i.Expires
+	}
+
+	return result
+}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
 // codebeat:disable[ABC,LOC]
 
 func parseRedisInfo(rawInfo string) (*Info, error) {
@@ -149,9 +181,8 @@ func parseRedisInfo(rawInfo string) (*Info, error) {
 	var info = &Info{
 		Sections: make(map[string]*InfoSection),
 		Keyspace: &KeyspaceInfo{
-			Databases: make([]string, 0),
-			DBList:    make(map[string]*DBInfo),
-			Total:     &DBInfo{},
+			Databases: make([]int, 0),
+			DBList:    make(map[int]*DBInfo),
 		},
 	}
 
@@ -189,14 +220,11 @@ func parseRedisInfo(rawInfo string) (*Info, error) {
 			section.Values[k] = v
 
 			if section.Header == "Keyspace" {
-				dbName := strings.TrimLeft(k, "db")
+				dbName, _ := strconv.Atoi(strings.TrimLeft(k, "db"))
 				dbInfo := parseDBInfo(v)
 
 				info.Keyspace.Databases = append(info.Keyspace.Databases, dbName)
 				info.Keyspace.DBList[dbName] = dbInfo
-
-				info.Keyspace.Total.Keys += dbInfo.Keys
-				info.Keyspace.Total.Expires += dbInfo.Expires
 			}
 		}
 	}

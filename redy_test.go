@@ -705,6 +705,31 @@ func (rs *RedySuite) TestKeyspaceInfoParser(c *C) {
 	c.Assert(info.AvgTTL, Equals, uint64(0))
 }
 
+func (rs *RedySuite) TestKeyspaceCalculation(c *C) {
+	r := rs.c.Cmd("SETEX", "_expires", 100000, "test")
+	c.Assert(r, NotNil)
+	c.Assert(r.Err, IsNil)
+
+	r = rs.c.Cmd("INFO")
+
+	c.Assert(r, NotNil)
+	c.Assert(r.Err, IsNil)
+	c.Assert(r.HasType(STR_BULK), Equals, true)
+
+	info, err := ParseInfo(r)
+
+	c.Assert(err, IsNil)
+	c.Assert(info, NotNil)
+
+	c.Assert(info.Keyspace.Databases, HasLen, 1)
+	c.Assert(info.Keyspace.DBList, HasLen, 1)
+	c.Assert(info.Keyspace.Databases[0], Equals, 0)
+	c.Assert(info.Keyspace.DBList[0].Keys, Not(Equals), uint64(0))
+	c.Assert(info.Keyspace.DBList[0].Expires, Equals, uint64(1))
+	c.Assert(info.Keyspace.Keys(), Not(Equals), uint64(0))
+	c.Assert(info.Keyspace.Expires(), Not(Equals), uint64(0))
+}
+
 func (rs *RedySuite) TestAux(c *C) {
 	c.Assert(extractConfValue("abc"), Equals, "abc")
 
