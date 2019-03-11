@@ -726,7 +726,6 @@ func (rs *RedySuite) TestKeyspaceCalculation(c *C) {
 	c.Assert(info.Keyspace.Databases[0], Equals, 0)
 	c.Assert(info.Keyspace.DBList[0].Keys, Not(Equals), uint64(0))
 	c.Assert(info.Keyspace.DBList[0].Expires, Equals, uint64(1))
-	c.Assert(info.Keyspace.DBList[0].AvgTTL, Not(Equals), uint64(0))
 	c.Assert(info.Keyspace.Keys(), Not(Equals), uint64(0))
 	c.Assert(info.Keyspace.Expires(), Not(Equals), uint64(0))
 }
