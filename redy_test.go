@@ -513,6 +513,7 @@ func (rs *RedySuite) TestInfoParser(c *C) {
 	c.Assert(info, NotNil)
 
 	c.Assert(info.Get("server", "redis_mode"), Equals, "standalone")
+	c.Assert(info.Get("server", "unknown1", "unknown2"), Equals, "")
 	c.Assert(info.GetI("server", "hz"), Equals, 10)
 	c.Assert(info.GetU("server", "hz"), Equals, uint64(10))
 	c.Assert(info.GetF("memory", "mem_fragmentation_ratio"), Not(Equals), 0.0)
