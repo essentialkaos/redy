@@ -1,7 +1,5 @@
 <p align="center"><a href="#readme"><img src="https://gh.kaos.st/go-redy.svg"/></a></p>
 
-<p align="center"><a href="#installation">Installation</a> • <a href="#usage-example">Usage example</a> • <a href="#build-status">Build Status</a> • <a href="#license">License</a></p>
-
 <p align="center">
   <a href="https://godoc.org/pkg.re/essentialkaos/redy.v4"><img src="https://godoc.org/pkg.re/essentialkaos/redy.v4?status.svg"></a>
   <a href="https://goreportcard.com/report/github.com/essentialkaos/redy"><img src="https://goreportcard.com/badge/github.com/essentialkaos/redy"></a>
@@ -10,6 +8,10 @@
   <a href='https://coveralls.io/github/essentialkaos/redy'><img src='https://coveralls.io/repos/github/essentialkaos/redy/badge.svg' alt='Coverage Status' /></a>
   <a href="https://github.com/essentialkaos/redy/blob/master/LICENSE"><img src="https://gh.kaos.st/mit.svg"></a>
 </p>
+
+<p align="center"><a href="#installation">Installation</a> • <a href="#usage-example">Usage example</a> • <a href="#build-status">Build Status</a> • <a href="#license">License</a></p>
+
+<br/>
 
 `redy` is a tiny Redis client based on [radix.v2](https://github.com/mediocregopher/radix.v2) code base.
 
@@ -21,7 +23,7 @@ Before the initial install, allow git to use redirects for [pkg.re](https://gith
 git config --global http.https://pkg.re.followRedirects true
 ```
 
-Make sure you have a working Go 1.8+ workspace (_[instructions](https://golang.org/doc/install)_), then:
+Make sure you have a working Go 1.10+ workspace (_[instructions](https://golang.org/doc/install)_), then:
 
 ```
 go get pkg.re/essentialkaos/redy.v4
