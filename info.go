@@ -38,6 +38,15 @@ type InfoSection struct {
 	Values map[string]string
 }
 
+// ReplicaInfo contains info about connected replica
+type ReplicaInfo struct {
+	IP     string
+	Port   int
+	State  string
+	Offset int64
+	Lag    int64
+}
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 var defaultFieldsSeparators = []string{":"}
@@ -149,6 +158,36 @@ func (i *Info) GetU(section string, fields ...string) uint64 {
 	ru, _ := strconv.ParseUint(rs, 10, 64)
 
 	return ru
+}
+
+// GetReplicaInfo parses and returns info about connected replica with given index
+func (i *Info) GetReplicaInfo(index int) *ReplicaInfo {
+	rawInfo := i.Get("Replication",
+		"slave"+strconv.Itoa(index),
+		"replica"+strconv.Itoa(index),
+	)
+
+	if rawInfo == "" {
+		return nil
+	}
+
+	ip := readField(rawInfo, 1, false, "=", ",")
+	port := readField(rawInfo, 3, false, "=", ",")
+	state := readField(rawInfo, 5, false, "=", ",")
+	offset := readField(rawInfo, 7, false, "=", ",")
+	lag := readField(rawInfo, 9, false, "=", ",")
+
+	portInt, _ := strconv.ParseInt(port, 10, 64)
+	offsetInt, _ := strconv.ParseInt(offset, 10, 64)
+	lagInt, _ := strconv.ParseInt(lag, 10, 64)
+
+	return &ReplicaInfo{
+		IP:     ip,
+		Port:   int(portInt),
+		State:  state,
+		Offset: offsetInt,
+		Lag:    lagInt,
+	}
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
