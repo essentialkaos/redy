@@ -512,10 +512,26 @@ func (rs *RedySuite) TestInfoParser(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(info, NotNil)
 
+	// Append fake slave info
+	info.Sections["Replication"].Values["slave0"] = "ip=123.21.98.33,port=23477,state=online,offset=14177815,lag=351"
+
 	c.Assert(info.Get("server", "redis_mode"), Equals, "standalone")
+	c.Assert(info.Get("server", "unknown1", "unknown2"), Equals, "")
 	c.Assert(info.GetI("server", "hz"), Equals, 10)
 	c.Assert(info.GetU("server", "hz"), Equals, uint64(10))
 	c.Assert(info.GetF("memory", "mem_fragmentation_ratio"), Not(Equals), 0.0)
+
+	replicaInfo := info.GetReplicaInfo(0)
+
+	c.Assert(replicaInfo, NotNil)
+	c.Assert(replicaInfo.IP, Equals, "123.21.98.33")
+	c.Assert(replicaInfo.Port, Equals, 23477)
+	c.Assert(replicaInfo.State, Equals, "online")
+	c.Assert(replicaInfo.Offset, Equals, int64(14177815))
+	c.Assert(replicaInfo.Lag, Equals, int64(351))
+
+	replicaInfo = info.GetReplicaInfo(1)
+	c.Assert(replicaInfo, IsNil)
 
 	flatInfo := info.Flatten()
 
