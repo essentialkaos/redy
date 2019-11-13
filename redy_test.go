@@ -560,8 +560,8 @@ func (rs *RedySuite) TestInfoParser(c *C) {
 
 	c.Assert(info.Get("", ""), Equals, "")
 	c.Assert(info.Get("abcd", "abcd"), Equals, "")
-	c.Assert(info.GetI("", ""), Equals, -1)
-	c.Assert(info.GetF("", ""), Equals, float64(-1))
+	c.Assert(info.GetI("", ""), Equals, 0)
+	c.Assert(info.GetF("", ""), Equals, 0.0)
 	c.Assert(info.GetU("", ""), Equals, uint64(0))
 
 	// --
@@ -572,8 +572,8 @@ func (rs *RedySuite) TestInfoParser(c *C) {
 
 	c.Assert(info.Get("", ""), Equals, "")
 	c.Assert(info.Get("abcd", "abcd"), Equals, "")
-	c.Assert(info.GetI("", ""), Equals, -1)
-	c.Assert(info.GetF("", ""), Equals, float64(-1))
+	c.Assert(info.GetI("", ""), Equals, 0)
+	c.Assert(info.GetF("", ""), Equals, 0.0)
 	c.Assert(info.GetU("", ""), Equals, uint64(0))
 }
 
