@@ -126,7 +126,7 @@ func (i *Info) GetI(section string, fields ...string) int {
 	rs := i.Get(section, fields...)
 
 	if rs == "" {
-		return -1
+		return 0
 	}
 
 	ri, _ := strconv.Atoi(rs)
@@ -139,7 +139,7 @@ func (i *Info) GetF(section string, fields ...string) float64 {
 	rs := i.Get(section, fields...)
 
 	if rs == "" {
-		return -1
+		return 0.0
 	}
 
 	rf, _ := strconv.ParseFloat(rs, 64)
