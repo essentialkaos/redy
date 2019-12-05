@@ -4,7 +4,7 @@
   <a href="https://godoc.org/pkg.re/essentialkaos/redy.v4"><img src="https://godoc.org/pkg.re/essentialkaos/redy.v4?status.svg"></a>
   <a href="https://goreportcard.com/report/github.com/essentialkaos/redy"><img src="https://goreportcard.com/badge/github.com/essentialkaos/redy"></a>
   <a href="https://codebeat.co/projects/github-com-essentialkaos-redy-master"><img alt="codebeat badge" src="https://codebeat.co/badges/1398d17c-e335-43c7-92d7-3aa484b2454c" /></a>
-  <a href="https://travis-ci.org/essentialkaos/redy"><img src="https://travis-ci.org/essentialkaos/redy.svg"></a>
+  <a href="https://travis-ci.com/essentialkaos/redy"><img src="https://travis-ci.com/essentialkaos/redy.svg"></a>
   <a href='https://coveralls.io/github/essentialkaos/redy'><img src='https://coveralls.io/repos/github/essentialkaos/redy/badge.svg' alt='Coverage Status' /></a>
   <a href="https://github.com/essentialkaos/redy/blob/master/LICENSE"><img src="https://gh.kaos.st/mit.svg"></a>
 </p>
@@ -89,8 +89,8 @@ func main() {
 
 | Branch     | Status |
 |------------|--------|
-| `master` (_Stable_) | [![Build Status](https://travis-ci.org/essentialkaos/redy.svg?branch=master)](https://travis-ci.org/essentialkaos/redy) |
-| `develop` (_Unstable_) | [![Build Status](https://travis-ci.org/essentialkaos/redy.svg?branch=develop)](https://travis-ci.org/essentialkaos/redy) |
+| `master` (_Stable_) | [![Build Status](https://travis-ci.com/essentialkaos/redy.svg?branch=master)](https://travis-ci.com/essentialkaos/redy) |
+| `develop` (_Unstable_) | [![Build Status](https://travis-ci.com/essentialkaos/redy.svg?branch=develop)](https://travis-ci.com/essentialkaos/redy) |
 
 ### License
 
