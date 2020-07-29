@@ -5,6 +5,7 @@
   <a href="https://goreportcard.com/report/github.com/essentialkaos/redy"><img src="https://goreportcard.com/badge/github.com/essentialkaos/redy"></a>
   <a href="https://codebeat.co/projects/github-com-essentialkaos-redy-master"><img alt="codebeat badge" src="https://codebeat.co/badges/1398d17c-e335-43c7-92d7-3aa484b2454c" /></a>
   <a href="https://travis-ci.com/essentialkaos/redy"><img src="https://travis-ci.com/essentialkaos/redy.svg"></a>
+  <a href="https://github.com/essentialkaos/redy/actions?query=workflow%3ACodeQL"><img src="https://github.com/essentialkaos/redy/workflows/CodeQL/badge.svg" /></a>
   <a href='https://coveralls.io/github/essentialkaos/redy'><img src='https://coveralls.io/repos/github/essentialkaos/redy/badge.svg' alt='Coverage Status' /></a>
   <a href="https://github.com/essentialkaos/redy/blob/master/LICENSE"><img src="https://gh.kaos.st/mit.svg"></a>
 </p>
