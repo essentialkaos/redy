@@ -68,7 +68,7 @@ func (c *Config) Get(prop string) string {
 }
 
 // Has checks if given configuration property exists in configuration
-func (c *Config) Has(prop string) string {
+func (c *Config) Has(prop string) bool {
 	if c == nil || prop == "" {
 		return false
 	}
