@@ -602,6 +602,10 @@ func (rs *RedySuite) TestConfigParsers(c *C) {
 	c.Assert(fcAuth, Equals, "")
 	c.Assert(fcSave, Equals, "900 1 300 10 60 10000")
 
+	c.Assert(fileConf.Has("tcp-keepalive"), Equals, true)
+	c.Assert(fileConf.Has("udp-keepalive"), Equals, false)
+	c.Assert(fileConf.Has(""), Equals, false)
+
 	memConf, err := rs.c.GetConfig("SET")
 
 	c.Assert(err, NotNil)
