@@ -12,7 +12,7 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// Config is struct with Redis config data
+// Config is struct with Redis configuration data
 type Config struct {
 	Props []string
 	Data  map[string][]string
@@ -24,7 +24,7 @@ var ErrWrongConfResponse = errors.New("CONFIG command response must have Array t
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// ReadConfig read and parse Redis config
+// ReadConfig reads and parses Redis configuration file
 func ReadConfig(file string) (*Config, error) {
 	fd, err := os.Open(file)
 
@@ -48,7 +48,7 @@ func ParseConfig(r *Resp) (*Config, error) {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// Get return config property as string
+// Get returns configuration property value as string
 func (c *Config) Get(prop string) string {
 	if c == nil || prop == "" {
 		return ""
@@ -67,7 +67,19 @@ func (c *Config) Get(prop string) string {
 	return strings.Join(value, " ")
 }
 
-// Diff compare two configs
+// Has checks if given configuration property exists in configuration
+func (c *Config) Has(prop string) string {
+	if c == nil || prop == "" {
+		return false
+	}
+
+	_, ok := c.Data[prop]
+
+	return ok
+}
+
+// Diff compares two configurations and returns slice with names of
+// differ properties
 func (c *Config) Diff(nc *Config) []string {
 	if c == nil || nc == nil {
 		return []string{}
