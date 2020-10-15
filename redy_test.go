@@ -604,6 +604,7 @@ func (rs *RedySuite) TestConfigParsers(c *C) {
 
 	c.Assert(fileConf.Has("tcp-keepalive"), Equals, true)
 	c.Assert(fileConf.Has("udp-keepalive"), Equals, false)
+	c.Assert(fileConf.Has(""), Equals, false)
 
 	memConf, err := rs.c.GetConfig("SET")
 
