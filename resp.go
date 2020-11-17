@@ -153,7 +153,7 @@ func (r *Resp) Int() (int, error) {
 	i, err := r.Int64()
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	if i > int64(maxInt) {
