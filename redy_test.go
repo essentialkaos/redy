@@ -583,12 +583,12 @@ func (rs *RedySuite) TestConfigParsers(c *C) {
 	c.Assert(cfg.Get("abc"), Equals, "")
 	c.Assert(cfg.Get(""), Equals, "")
 
-	fileConf, err := ReadConfig(".travis/test.conf")
+	fileConf, err := ReadConfig(".tests/test.conf")
 
 	c.Assert(err, NotNil)
 	c.Assert(fileConf, IsNil)
 
-	fileConf, err = ReadConfig(".travis/full.conf")
+	fileConf, err = ReadConfig(".tests/full.conf")
 
 	c.Assert(err, IsNil)
 	c.Assert(fileConf, NotNil)
