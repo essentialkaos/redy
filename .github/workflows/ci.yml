@@ -54,7 +54,7 @@ jobs:
       - name: Run tests
         working-directory: ${{env.SRC_DIR}}
         env:
-          REDIS_IP: redis
+          REDIS_IP: localhost
           REDIS_PORT: 6379
         run: |
           go test -race .
