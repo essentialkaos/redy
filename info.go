@@ -177,7 +177,7 @@ func (i *Info) GetReplicaInfo(index int) *ReplicaInfo {
 	offset := readField(rawInfo, 7, false, "=", ",")
 	lag := readField(rawInfo, 9, false, "=", ",")
 
-	portInt, _ := strconv.ParseInt(port, 10, 64)
+	portInt, _ := strconv.Atoi(port)
 	offsetInt, _ := strconv.ParseInt(offset, 10, 64)
 	lagInt, _ := strconv.ParseInt(lag, 10, 64)
 
