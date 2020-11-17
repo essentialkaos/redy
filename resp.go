@@ -82,6 +82,8 @@ var (
 	nilFormatted = []byte("$-1\r\n")
 )
 
+var maxInt = int(^uint(0) >> 1)
+
 var typeOfBytes = reflect.TypeOf([]byte(nil))
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -149,7 +151,16 @@ func (r *Resp) Str() (string, error) {
 // Int returns an int representing the value of the Resp
 func (r *Resp) Int() (int, error) {
 	i, err := r.Int64()
-	return int(i), err
+
+	if err != nil {
+		return err
+	}
+
+	if i > int64(maxInt) {
+		return maxInt, nil
+	}
+
+	return int(i), nil
 }
 
 // Int64 returns an int64 representing the value of the Resp
