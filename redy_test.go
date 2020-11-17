@@ -244,6 +244,13 @@ func (rs *RedySuite) TestRespRead(c *C) {
 	c.Assert(i, Equals, 1024)
 	c.Assert(r.String(), Equals, "Resp(Int 1024)")
 
+	// Check int max
+	maxInt = 10
+	i, err = r.Int()
+	c.Assert(err, IsNil)
+	c.Assert(i, Equals, 10)
+	maxInt = int(^uint(0) >> 1)
+
 	// Int (from string)
 	r = pretendRead("+50\r\n")
 	c.Assert(r.HasType(STR_SIMPLE), Equals, true)
