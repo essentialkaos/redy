@@ -583,12 +583,12 @@ func (rs *RedySuite) TestConfigParsers(c *C) {
 	c.Assert(cfg.Get("abc"), Equals, "")
 	c.Assert(cfg.Get(""), Equals, "")
 
-	fileConf, err := ReadConfig(".travis/test.conf")
+	fileConf, err := ReadConfig(".tests/test.conf")
 
 	c.Assert(err, NotNil)
 	c.Assert(fileConf, IsNil)
 
-	fileConf, err = ReadConfig(".travis/full.conf")
+	fileConf, err = ReadConfig(".tests/full.conf")
 
 	c.Assert(err, IsNil)
 	c.Assert(fileConf, NotNil)
@@ -600,7 +600,8 @@ func (rs *RedySuite) TestConfigParsers(c *C) {
 
 	c.Assert(fcKeepalive, Equals, "300")
 	c.Assert(fcAuth, Equals, "")
-	c.Assert(fcSave, Equals, "900 1 300 10 60 10000")
+
+	c.Assert(fcSave, Equals, "3600 1 300 100 60 10000")
 
 	c.Assert(fileConf.Has("tcp-keepalive"), Equals, true)
 	c.Assert(fileConf.Has("udp-keepalive"), Equals, false)
