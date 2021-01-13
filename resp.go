@@ -429,7 +429,7 @@ func readSimpleStr(r *bufio.Reader) (Resp, error) {
 		return Resp{}, ErrParse
 	}
 
-	return Resp{nil, STR_SIMPLE, b[1 : len(b)-2]}, nil
+	return Resp{nil, b[1 : len(b)-2], STR_SIMPLE}, nil
 }
 
 func readError(r *bufio.Reader) (Resp, error) {
@@ -465,7 +465,7 @@ func readInt(r *bufio.Reader) (Resp, error) {
 		return Resp{}, ErrParse
 	}
 
-	return Resp{nil, INT, i}, nil
+	return Resp{nil, i, INT}, nil
 }
 
 func readBulkStr(r *bufio.Reader) (Resp, error) {
@@ -487,7 +487,7 @@ func readBulkStr(r *bufio.Reader) (Resp, error) {
 	case size > 512*1024*1024:
 		return Resp{}, ErrRespTooBig
 	case size < 0:
-		return Resp{nil, NIL, nil}, nil
+		return Resp{nil, nil, NIL}, nil
 	}
 
 	data := make([]byte, size)
@@ -538,7 +538,7 @@ func readArray(r *bufio.Reader) (Resp, error) {
 	case err != nil:
 		return Resp{}, ErrParse
 	case size < 0:
-		return Resp{nil, NIL, nil}, nil
+		return Resp{nil, nil, NIL}, nil
 	}
 
 	data := make([]Resp, 0)
@@ -858,7 +858,7 @@ func writeMap(w io.Writer, buf []byte, mt interface{}) (int, error) {
 }
 
 func errToResp(t RespType, err error) Resp {
-	return Resp{err, t, err}
+	return Resp{err, err, t}
 }
 
 func arrayToString(resp *Resp) string {
