@@ -42,8 +42,8 @@ type RespType uint8
 type Resp struct {
 	Err error
 
-	typ RespType
 	val interface{}
+	typ RespType
 }
 
 // RespReader is a wrapper around an io.Reader which will read Resp messages off
