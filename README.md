@@ -1,7 +1,7 @@
 <p align="center"><a href="#readme"><img src="https://gh.kaos.st/go-redy.svg"/></a></p>
 
 <p align="center">
-  <a href="https://pkg.go.dev/pkg.re/essentialkaos/redy.v4"><img src="https://gh.kaos.st/godoc.svg" alt="PkgGoDev"></a>
+  <a href="https://pkg.re/essentialkaos/redy.v4?docs"><img src="https://gh.kaos.st/godoc.svg" alt="PkgGoDev"></a>
   <a href="https://goreportcard.com/report/github.com/essentialkaos/redy"><img src="https://goreportcard.com/badge/github.com/essentialkaos/redy"></a>
   <a href="https://codebeat.co/projects/github-com-essentialkaos-redy-master"><img alt="codebeat badge" src="https://codebeat.co/badges/1398d17c-e335-43c7-92d7-3aa484b2454c" /></a>
   <a href="https://github.com/essentialkaos/redy/actions"><img src="https://github.com/essentialkaos/redy/workflows/CI/badge.svg" alt="GitHub Actions Status" /></a>
