@@ -1,13 +1,13 @@
 <p align="center"><a href="#readme"><img src="https://gh.kaos.st/go-redy.svg"/></a></p>
 
 <p align="center">
-  <a href="https://pkg.re/essentialkaos/redy.v4?docs"><img src="https://gh.kaos.st/godoc.svg" alt="PkgGoDev"></a>
-  <a href="https://goreportcard.com/report/github.com/essentialkaos/redy"><img src="https://goreportcard.com/badge/github.com/essentialkaos/redy"></a>
-  <a href="https://codebeat.co/projects/github-com-essentialkaos-redy-master"><img alt="codebeat badge" src="https://codebeat.co/badges/1398d17c-e335-43c7-92d7-3aa484b2454c" /></a>
-  <a href="https://github.com/essentialkaos/redy/actions"><img src="https://github.com/essentialkaos/redy/workflows/CI/badge.svg" alt="GitHub Actions Status" /></a>
-  <a href="https://github.com/essentialkaos/redy/actions?query=workflow%3ACodeQL"><img src="https://github.com/essentialkaos/redy/workflows/CodeQL/badge.svg" /></a>
-  <a href='https://coveralls.io/github/essentialkaos/redy'><img src='https://coveralls.io/repos/github/essentialkaos/redy/badge.svg' alt='Coverage Status' /></a>
-  <a href="https://github.com/essentialkaos/redy/blob/master/LICENSE"><img src="https://gh.kaos.st/mit.svg"></a>
+  <a href="https://kaos.sh/g/redy.v4"><img src="https://gh.kaos.st/godoc.svg" alt="PkgGoDev"></a>
+  <a href="https://kaos.sh/r/redy"><img src="https://kaos.sh/r/redy.svg" alt="GoReportCard" /></a>
+  <a href="https://kaos.sh/b/redy"><img src="https://kaos.sh/b/1398d17c-e335-43c7-92d7-3aa484b2454c.svg" alt="Codebeat badge" /></a>
+  <a href="https://kaos.sh/w/redy/ci"><img src="https://kaos.sh/w/redy/ci.svg" alt="GitHub Actions CI Status" /></a>
+  <a href="https://kaos.sh/w/redy/codeql"><img src="https://kaos.sh/w/redy/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
+  <a href="https://kaos.sh/c/redy"><img src="https://kaos.sh/c/redy.svg" alt="Coverage Status" /></a>
+  <a href="#license"><img src="https://gh.kaos.st/mit.svg"></a>
 </p>
 
 <p align="center"><a href="#installation">Installation</a> • <a href="#usage-example">Usage example</a> • <a href="#build-status">Build Status</a> • <a href="#license">License</a></p>
@@ -18,16 +18,16 @@
 
 ### Installation
 
-Make sure you have a working Go 1.16+ workspace (_[instructions](https://golang.org/doc/install)_), then:
+Make sure you have a working Go 1.17+ workspace (_[instructions](https://golang.org/doc/install)_), then:
 
 ```
-go get pkg.re/essentialkaos/redy.v4
+go get github.com/essentialkaos/redy/v4
 ```
 
 For update to latest stable release, do:
 
 ```
-go get -u pkg.re/essentialkaos/redy.v4
+go get -u github.com/essentialkaos/redy/v4
 ```
 
 ### Usage example
@@ -38,7 +38,7 @@ import (
   "fmt"
   "time"
 
-  "pkg.re/essentialkaos/redy.v4"
+  "github.com/essentialkaos/redy/v4"
 )
 
 func main() {
@@ -84,8 +84,8 @@ func main() {
 
 | Branch     | Status |
 |------------|--------|
-| `master` (_Stable_) | [![CI](https://github.com/essentialkaos/redy/workflows/CI/badge.svg?branch=master)](https://github.com/essentialkaos/redy/actions) |
-| `develop` (_Unstable_) | [![CI](https://github.com/essentialkaos/redy/workflows/CI/badge.svg?branch=develop)](https://github.com/essentialkaos/redy/actions) |
+| `master` | [![CI](https://kaos.sh/w/redy/ci.svg?branch=master)](https://kaos.sh/w/redy/ci?query=branch:master) |
+| `develop` | [![CI](https://kaos.sh/w/redy/ci.svg?branch=develop)](https://kaos.sh/w/redy/ci?query=branch:develop) |
 
 ### License
 
