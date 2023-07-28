@@ -14,7 +14,7 @@ import (
 
 type req struct {
 	cmd  string
-	args []interface{}
+	args []any
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -88,7 +88,7 @@ func (c *Client) Connect() error {
 }
 
 // Cmd calls the given Redis command
-func (c *Client) Cmd(cmd string, args ...interface{}) *Resp {
+func (c *Client) Cmd(cmd string, args ...any) *Resp {
 	if c.conn == nil {
 		resp := errToResp(ERR_IO, ErrNotConnected)
 		return &resp
@@ -105,7 +105,7 @@ func (c *Client) Cmd(cmd string, args ...interface{}) *Resp {
 }
 
 // PipeAppend adds the given call to the pipeline queue
-func (c *Client) PipeAppend(cmd string, args ...interface{}) {
+func (c *Client) PipeAppend(cmd string, args ...any) {
 	c.pending = append(c.pending, req{cmd, args})
 }
 

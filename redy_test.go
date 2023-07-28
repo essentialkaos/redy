@@ -108,7 +108,7 @@ func (rs *RedySuite) TestCmd(c *C) {
 	c.Assert(err, NotNil)
 
 	key = randString(12)
-	args := map[string]interface{}{
+	args := map[string]any{
 		"someBytes":  []byte("blah"),
 		"someString": "foo",
 		"someInt":    10,
@@ -389,7 +389,7 @@ func (rs *RedySuite) TestReqEncoding(c *C) {
 	r = rs.c.Cmd("ECHO", Resp{typ: STR_SIMPLE, val: "TEST"})
 	c.Assert(r.Err, IsNil)
 
-	r = rs.c.Cmd("ECHO", []interface{}{1})
+	r = rs.c.Cmd("ECHO", []any{1})
 	c.Assert(r.Err, IsNil)
 
 	r = rs.c.Cmd("ECHO", []int{1})
