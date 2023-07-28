@@ -5,6 +5,7 @@ package redy
 import (
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -183,8 +184,6 @@ func (i *Info) Is(section string, field string, value any) bool {
 		return int64(i.GetI(section, field)) == t
 	case float64:
 		return i.GetF(section, field) == t
-	case uint:
-		return uint(i.GetU(section, field)) == t
 	case uint64:
 		return i.GetU(section, field) == t
 	}
