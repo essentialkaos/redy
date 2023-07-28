@@ -179,8 +179,12 @@ func (i *Info) Is(section string, field string, value any) bool {
 		return i.GetB(section, field) == t
 	case int:
 		return i.GetI(section, field) == t
+	case int64:
+		return int64(i.GetI(section, field)) == t
 	case float64:
 		return i.GetF(section, field) == t
+	case uint:
+		return uint(i.GetU(section, field)) == t
 	case uint64:
 		return i.GetU(section, field) == t
 	}

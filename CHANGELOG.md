@@ -34,7 +34,7 @@
 
 ### 4.0.0
 
-* Total number of keys and expires now calculated on demand
+* The total number of keys and expires now calculated on demand
 * Added keyspace info to flattened info data
 * Using integers for DBs instead of strings
 
@@ -46,7 +46,7 @@
 
 ### 3.0.0
 
-* `InfoSection.Props` renamed to `InfoSection.Fields`
+* `InfoSection.Props` was renamed to `InfoSection.Fields`
 
 ----
 
