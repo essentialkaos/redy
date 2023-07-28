@@ -532,6 +532,14 @@ func (rs *RedySuite) TestInfoParser(c *C) {
 	c.Assert(info.GetB("replication", "repl_backlog_active"), Equals, false)
 	c.Assert(info.GetB("persistence", "aof_enabled"), Equals, true)
 
+	c.Assert(info.Is("server", "redis_mode", "standalone"), Equals, true)
+	c.Assert(info.Is("server", "redis_mode", "standalone"), Equals, true)
+	c.Assert(info.Is("server", "hz", 10), Equals, true)
+	c.Assert(info.Is("server", "hz", int64(10)), Equals, true)
+	c.Assert(info.Is("server", "hz", uint64(10)), Equals, true)
+	c.Assert(info.Is("replication", "repl_backlog_active", false), Equals, true)
+	c.Assert(info.Is("persistence", "aof_enabled", true), Equals, true)
+
 	replicaInfo := info.GetReplicaInfo(0)
 
 	c.Assert(replicaInfo, NotNil)

@@ -172,6 +172,22 @@ func (i *Info) GetU(section string, fields ...string) uint64 {
 	return ru
 }
 
+// Is checks if field value is equals to given value
+func (i *Info) Is(section string, field string, value any) bool {
+	switch t := value.(type) {
+	case bool:
+		return i.GetB(section, field) == t
+	case int:
+		return i.GetI(section, field) == t
+	case float64:
+		return i.GetF(section, field) == t
+	case uint64:
+		return i.GetU(section, field) == t
+	}
+
+	return i.Get(section, field) == fmt.Sprintf("%s", value)
+}
+
 // GetReplicaInfo parses and returns info about connected replica with given index
 func (i *Info) GetReplicaInfo(index int) *ReplicaInfo {
 	rawInfo := i.Get("Replication",
