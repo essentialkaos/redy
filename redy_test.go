@@ -519,14 +519,18 @@ func (rs *RedySuite) TestInfoParser(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(info, NotNil)
 
-	// Append fake slave info
+	// Append fake info
+	info.Sections["Persistence"].Values["aof_enabled"] = "1"
 	info.Sections["Replication"].Values["slave0"] = "ip=123.21.98.33,port=23477,state=online,offset=14177815,lag=351"
+	info.Sections["Replication"].Values["replica1"] = "ip=123.21.98.33,port=23477,state=online,offset=14177815,lag=351"
 
 	c.Assert(info.Get("server", "redis_mode"), Equals, "standalone")
 	c.Assert(info.Get("server", "unknown1", "unknown2"), Equals, "")
 	c.Assert(info.GetI("server", "hz"), Equals, 10)
 	c.Assert(info.GetU("server", "hz"), Equals, uint64(10))
 	c.Assert(info.GetF("memory", "mem_fragmentation_ratio"), Not(Equals), 0.0)
+	c.Assert(info.GetF("replication", "repl_backlog_active"), Equals, false)
+	c.Assert(info.GetF("persistence", "aof_enabled"), Equals, true)
 
 	replicaInfo := info.GetReplicaInfo(0)
 
@@ -538,6 +542,9 @@ func (rs *RedySuite) TestInfoParser(c *C) {
 	c.Assert(replicaInfo.Lag, Equals, int64(351))
 
 	replicaInfo = info.GetReplicaInfo(1)
+	c.Assert(replicaInfo, NotNil)
+
+	replicaInfo = info.GetReplicaInfo(2)
 	c.Assert(replicaInfo, IsNil)
 
 	flatInfo := info.Flatten()

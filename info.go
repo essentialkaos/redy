@@ -121,6 +121,18 @@ func (i *Info) Get(section string, fields ...string) string {
 	return ""
 }
 
+// GetB returns field value as boolean
+func (i *Info) GetB(section string, fields ...string) bool {
+	rs := i.Get(section, fields...)
+
+	switch strings.ToLower(rs) {
+	case "1", "ok":
+		return true
+	}
+
+	return false
+}
+
 // GetI returns field value as int
 func (i *Info) GetI(section string, fields ...string) int {
 	rs := i.Get(section, fields...)
