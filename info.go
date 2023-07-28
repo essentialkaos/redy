@@ -5,7 +5,6 @@ package redy
 import (
 	"errors"
 	"fmt"
-	"math"
 	"strconv"
 	"strings"
 )
