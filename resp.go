@@ -42,7 +42,7 @@ type RespType uint8
 type Resp struct {
 	Err error
 
-	val interface{}
+	val any
 	typ RespType
 }
 
@@ -556,11 +556,11 @@ func readArray(r *bufio.Reader) (Resp, error) {
 	return Resp{typ: ARRAY, val: data}, nil
 }
 
-func flatten(m interface{}) []interface{} {
+func flatten(m any) []any {
 	t := reflect.TypeOf(m)
 
 	if t == typeOfBytes {
-		return []interface{}{m}
+		return []any{m}
 	}
 
 	switch t.Kind() {
@@ -571,14 +571,14 @@ func flatten(m interface{}) []interface{} {
 		return flattenMap(m)
 
 	default:
-		return []interface{}{m}
+		return []any{m}
 	}
 }
 
-func flattenSlice(m interface{}) []interface{} {
+func flattenSlice(m any) []any {
 	rm := reflect.ValueOf(m)
 	l := rm.Len()
-	ret := make([]interface{}, 0, l)
+	ret := make([]any, 0, l)
 
 	for i := 0; i < l; i++ {
 		ret = append(ret, flatten(rm.Index(i).Interface())...)
@@ -587,7 +587,7 @@ func flattenSlice(m interface{}) []interface{} {
 	return ret
 }
 
-func flattenedLength(mm ...interface{}) int {
+func flattenedLength(mm ...any) int {
 	var total int
 
 	for _, m := range mm {
@@ -621,7 +621,7 @@ func flattenedLength(mm ...interface{}) int {
 	return total
 }
 
-func flattenedSliceLength(m interface{}) int {
+func flattenedSliceLength(m any) int {
 	var total int
 
 	rm := reflect.ValueOf(m)
@@ -634,7 +634,7 @@ func flattenedSliceLength(m interface{}) int {
 	return total
 }
 
-func flattenedMapLength(m interface{}) int {
+func flattenedMapLength(m any) int {
 	var total int
 
 	rm := reflect.ValueOf(m)
@@ -650,11 +650,11 @@ func flattenedMapLength(m interface{}) int {
 	return total
 }
 
-func flattenMap(m interface{}) []interface{} {
+func flattenMap(m any) []any {
 	rm := reflect.ValueOf(m)
 	l := rm.Len() * 2
 	keys := rm.MapKeys()
-	ret := make([]interface{}, 0, l)
+	ret := make([]any, 0, l)
 
 	for _, k := range keys {
 		kv := k.Interface()
@@ -666,7 +666,7 @@ func flattenMap(m interface{}) []interface{} {
 	return ret
 }
 
-func writeTo(w io.Writer, buf []byte, m interface{}) (int, error) {
+func writeTo(w io.Writer, buf []byte, m any) (int, error) {
 	switch mt := m.(type) {
 	case []byte:
 		return writeBytes(w, buf, mt)
@@ -698,7 +698,7 @@ func writeTo(w io.Writer, buf []byte, m interface{}) (int, error) {
 	case Resp:
 		return writeTo(w, buf, mt.val)
 
-	case []interface{}:
+	case []any:
 		return writeInterface(w, buf, mt)
 
 	default:
@@ -791,7 +791,7 @@ func writeError(w io.Writer, buf []byte, e error) (int, error) {
 	return writeBytes(w, buf, errData)
 }
 
-func writeInterface(w io.Writer, buf []byte, mt []interface{}) (int, error) {
+func writeInterface(w io.Writer, buf []byte, mt []any) (int, error) {
 	var totalWritten int
 
 	l := len(mt)
@@ -808,7 +808,7 @@ func writeInterface(w io.Writer, buf []byte, mt []interface{}) (int, error) {
 	return totalWritten, nil
 }
 
-func writeSlice(w io.Writer, buf []byte, mt interface{}) (int, error) {
+func writeSlice(w io.Writer, buf []byte, mt any) (int, error) {
 	rm := reflect.ValueOf(mt)
 	l := rm.Len()
 
@@ -829,7 +829,7 @@ func writeSlice(w io.Writer, buf []byte, mt interface{}) (int, error) {
 	return totalWritten, nil
 }
 
-func writeMap(w io.Writer, buf []byte, mt interface{}) (int, error) {
+func writeMap(w io.Writer, buf []byte, mt any) (int, error) {
 	rm := reflect.ValueOf(mt)
 
 	var err error
@@ -884,7 +884,7 @@ func isTimeout(resp *Resp) bool {
 	return false
 }
 
-func intv(v interface{}) int {
+func intv(v any) int {
 	switch vt := v.(type) {
 	case int:
 		return vt

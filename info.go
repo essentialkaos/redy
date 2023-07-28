@@ -121,6 +121,18 @@ func (i *Info) Get(section string, fields ...string) string {
 	return ""
 }
 
+// GetB returns field value as boolean
+func (i *Info) GetB(section string, fields ...string) bool {
+	rs := i.Get(section, fields...)
+
+	switch strings.ToLower(rs) {
+	case "1", "ok":
+		return true
+	}
+
+	return false
+}
+
 // GetI returns field value as int
 func (i *Info) GetI(section string, fields ...string) int {
 	rs := i.Get(section, fields...)
@@ -158,6 +170,24 @@ func (i *Info) GetU(section string, fields ...string) uint64 {
 	ru, _ := strconv.ParseUint(rs, 10, 64)
 
 	return ru
+}
+
+// Is checks if field value is equals to given value
+func (i *Info) Is(section string, field string, value any) bool {
+	switch t := value.(type) {
+	case bool:
+		return i.GetB(section, field) == t
+	case int:
+		return i.GetI(section, field) == t
+	case int64:
+		return int64(i.GetI(section, field)) == t
+	case float64:
+		return i.GetF(section, field) == t
+	case uint64:
+		return i.GetU(section, field) == t
+	}
+
+	return i.Get(section, field) == fmt.Sprintf("%s", value)
 }
 
 // GetReplicaInfo parses and returns info about connected replica with given index
