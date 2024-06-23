@@ -1,28 +1,19 @@
-<p align="center"><a href="#readme"><img src="https://gh.kaos.st/go-redy.svg"/></a></p>
+<p align="center"><a href="#readme"><img src=".github/images/card.svg"/></a></p>
 
 <p align="center">
-  <a href="https://kaos.sh/g/redy.v4"><img src="https://gh.kaos.st/godoc.svg" alt="PkgGoDev"></a>
-  <a href="https://kaos.sh/r/redy"><img src="https://kaos.sh/r/redy.svg" alt="GoReportCard" /></a>
+  <a href="https://kaos.sh/g/redy.v4"><img src=".github/images/godoc.svg"/></a>
   <a href="https://kaos.sh/b/redy"><img src="https://kaos.sh/b/1398d17c-e335-43c7-92d7-3aa484b2454c.svg" alt="Codebeat badge" /></a>
   <a href="https://kaos.sh/w/redy/ci"><img src="https://kaos.sh/w/redy/ci.svg" alt="GitHub Actions CI Status" /></a>
   <a href="https://kaos.sh/w/redy/codeql"><img src="https://kaos.sh/w/redy/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
   <a href="https://kaos.sh/c/redy"><img src="https://kaos.sh/c/redy.svg" alt="Coverage Status" /></a>
-  <a href="#license"><img src="https://gh.kaos.st/mit.svg"></a>
+  <a href="#license"><img src=".github/images/license.svg"/></a>
 </p>
 
-<p align="center"><a href="#installation">Installation</a> • <a href="#usage-example">Usage example</a> • <a href="#build-status">Build Status</a> • <a href="#license">License</a></p>
+<p align="center"><a href="#usage-example">Usage example</a> • <a href="#ci-status">CI Status</a> • <a href="#license">License</a></p>
 
 <br/>
 
 `redy` is a tiny Redis client based on [radix.v2](https://github.com/mediocregopher/radix.v2) code base.
-
-### Installation
-
-Make sure you have a working Go 1.18+ workspace (_[instructions](https://go.dev/doc/install)_), then:
-
-```bash
-go get -u github.com/essentialkaos/redy/v4
-```
 
 ### Usage example
 ```go
@@ -74,7 +65,7 @@ func main() {
 }
 ```
 
-### Build Status
+### CI Status
 
 | Branch     | Status |
 |------------|--------|
