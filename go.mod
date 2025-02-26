@@ -1,6 +1,6 @@
 module github.com/essentialkaos/redy/v4
 
-go 1.18
+go 1.23.6
 
 require github.com/essentialkaos/check v1.4.1
 
