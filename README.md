@@ -15,6 +15,7 @@
 `redy` is a tiny Redis client based on [radix.v2](https://github.com/mediocregopher/radix.v2) code base.
 
 ### Usage example
+
 ```go
 package main
 
@@ -60,7 +61,7 @@ func main() {
     return
   }
 
-  fmt.Printf("ABC -> %d\n", val)
+  fmt.Printf("ABC → %d\n", val)
 }
 ```
 
