@@ -3,3 +3,6 @@ extend-exclude = ["go.sum"]
 
 [default.extend-words]
 Redy = "Redy"
+
+[default.extend-identifiers]
+typ = "typ"

@@ -2,7 +2,6 @@
 
 <p align="center">
   <a href="https://kaos.sh/g/redy.v4"><img src=".github/images/godoc.svg"/></a>
-  <a href="https://kaos.sh/b/redy"><img src="https://kaos.sh/b/1398d17c-e335-43c7-92d7-3aa484b2454c.svg" alt="Codebeat badge" /></a>
   <a href="https://kaos.sh/w/redy/ci"><img src="https://kaos.sh/w/redy/ci.svg" alt="GitHub Actions CI Status" /></a>
   <a href="https://kaos.sh/w/redy/codeql"><img src="https://kaos.sh/w/redy/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
   <a href="https://kaos.sh/c/redy"><img src="https://kaos.sh/c/redy.svg" alt="Coverage Status" /></a>
@@ -16,6 +15,7 @@
 `redy` is a tiny Redis client based on [radix.v2](https://github.com/mediocregopher/radix.v2) code base.
 
 ### Usage example
+
 ```go
 package main
 
@@ -61,7 +61,7 @@ func main() {
     return
   }
 
-  fmt.Printf("ABC -> %d\n", val)
+  fmt.Printf("ABC → %d\n", val)
 }
 ```
 
@@ -72,8 +72,12 @@ func main() {
 | `master` | [![CI](https://kaos.sh/w/redy/ci.svg?branch=master)](https://kaos.sh/w/redy/ci?query=branch:master) |
 | `develop` | [![CI](https://kaos.sh/w/redy/ci.svg?branch=develop)](https://kaos.sh/w/redy/ci?query=branch:develop) |
 
+### Contributing
+
+Before contributing to this project please read our [Contributing Guidelines](https://github.com/essentialkaos/.github/blob/master/CONTRIBUTING.md).
+
 ### License
 
 [MIT](LICENSE)
 
-<p align="center"><a href="https://essentialkaos.com"><img src="https://gh.kaos.st/ekgh.svg"/></a></p>
+<p align="center"><a href="https://kaos.dev"><img src="https://raw.githubusercontent.com/essentialkaos/.github/refs/heads/master/images/ekgh.svg"/></a></p>
