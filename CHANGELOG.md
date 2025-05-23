@@ -1,6 +1,10 @@
 ## Changelog
 
-### 4.4.0
+### 4.4.1
+
+_Bump version with no chagnes_
+
+### 4.3.4
 
 * Added method `GetB` to `Info` struct 
 * Added method `Is` to `Info` struct for comparing info fields values
